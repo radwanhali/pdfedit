@@ -24,8 +24,17 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
     ...(contract.fieldPositions || {}),
   };
 
-  // Background template image (uploaded image or default SVG)
-  const bgImageSrc = contract.backgroundImageUrl || '/contract_template.svg';
+  // Background template image (uploaded image or default SVG with relative base URL)
+  const getBgImageSrc = (url?: string) => {
+    if (url && (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://'))) {
+      return url;
+    }
+    const baseUrl = import.meta.env.BASE_URL || './';
+    const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+    return `${cleanBase}contract_template.svg`;
+  };
+
+  const bgImageSrc = getBgImageSrc(contract.backgroundImageUrl);
 
   // Dragging event handlers convert screen coordinates into SVG coordinate space (794 x 1123)
   const handleMouseDown = (fieldKey: keyof ContractFieldPositions, e: React.MouseEvent) => {
