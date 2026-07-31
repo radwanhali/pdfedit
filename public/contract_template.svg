@@ -1,9 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 794 1123" width="794" height="1123">
-  <!-- White Background Paper -->
-  <rect width="794" height="1123" fill="#ffffff"/>
+  <!-- Base White Paper -->
+  <rect width="794" height="1123" fill="#ffffff" />
 
-  <!-- Top Header Section -->
-  <!-- Left Header (English - Red Maroon) -->
+  <!-- Left Header (English - Maroon) -->
   <g fill="#800000" font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
     <text x="40" y="42" font-size="13" font-weight="800">Al Masa Alloys Corporation</text>
     <text x="40" y="60" font-size="11" font-weight="700">add/ Riyadh, Al Nour district</text>
@@ -22,34 +21,28 @@
     <text x="40" y="100" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="800" fill="#2b4c7e" letter-spacing="1">SABAIK ALMASA</text>
   </g>
 
-  <!-- Right Header (Arabic - Red Maroon) -->
+  <!-- Right Header (Arabic - Maroon) -->
   <g fill="#800000" font-family="'Traditional Arabic', 'Amiri', 'Segoe UI', sans-serif" direction="rtl" text-anchor="end">
     <text x="754" y="42" font-size="14" font-weight="800">مؤسسة سبائك الماسة</text>
     <text x="754" y="60" font-size="11" font-weight="700">العنوان : الرياض حي النور شارع الحصيبا</text>
     <text x="754" y="78" font-size="11" font-weight="700">الرقم الضريبي : 310122348700003</text>
   </g>
 
-  <!-- Service Agreement Title Bar (Blue) -->
+  <!-- Service Agreement Title Bar -->
   <rect x="40" y="132" width="714" height="28" fill="#5b859a"/>
   <text x="397" y="151" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="14.5" font-weight="bold" fill="#ffffff">اتفاقية خدمة</text>
 
-  <!-- Preamble Static Text Labels -->
+  <!-- Preamble Text Labels -->
   <g font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="bold" fill="#000000" direction="rtl" text-anchor="end">
     <text x="754" y="190">بعون الله ابرم هذا العقد رقم</text>
     <text x="525" y="190">في تاريخ</text>
     <text x="395" y="190">الموافق</text>
     <text x="210" y="190">و ينتهي في تاريخ</text>
-
     <text x="754" y="214">الموافق</text>
-
     <text x="754" y="238">بين كل من :</text>
-
     <text x="754" y="262">1- مؤسسة سبائك الماسة للمقاولات سجل تجاري 1010893280 (طرف اول)</text>
-
     <text x="754" y="288">2-</text>
-
     <text x="754" y="314">العنوان :</text>
-
     <text x="754" y="342">اتفق الطرفان على الاتي :</text>
   </g>
 

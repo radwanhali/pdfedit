@@ -102,6 +102,53 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
         </span>
       </div>
 
+      {/* Section 0: Contract Background Image Template */}
+      <div className="space-y-3 pt-2 border-b border-slate-100 pb-4">
+        <div className="flex items-center justify-between bg-slate-100/80 p-2.5 rounded-lg border border-slate-200">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+            <Image className="w-4 h-4 text-purple-600" />
+            <span>خلفية العقد (صورة أو نموذج العقد المطبوع)</span>
+          </div>
+
+          <span className="text-[11px] text-slate-500 font-medium">
+            {contract.backgroundImageUrl ? 'توجد صورة خلفية محددة' : 'ورقة بيضاء (بدون تصميم)'}
+          </span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors shadow-xs">
+            <Upload className="w-3.5 h-3.5" />
+            <span>رفع صورة نموذج العقد (PNG/JPG)</span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+          </label>
+
+          <button
+            type="button"
+            onClick={() => updateField('backgroundImageUrl', '/contract_template.svg')}
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-medium px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors"
+          >
+            <Image className="w-3.5 h-3.5 text-blue-600" />
+            <span>استخدام القالب الافتراضي</span>
+          </button>
+
+          {contract.backgroundImageUrl && (
+            <button
+              type="button"
+              onClick={handleResetImage}
+              className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-medium px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>إزالة الخلفية (ورقة بيضاء)</span>
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Section 1: Contract Number & Dates */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-700 bg-slate-100/80 p-2.5 rounded-lg border border-slate-200">

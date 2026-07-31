@@ -24,19 +24,6 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
     ...(contract.fieldPositions || {}),
   };
 
-  // Background template image (uploaded image or default SVG with relative base URL)
-  const getBgImageSrc = (url?: string) => {
-    if (url && (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://'))) {
-      return url;
-    }
-    const baseUrl = (import.meta as any).env?.BASE_URL || './';
-    const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
-    return `${cleanBase}contract_template.svg`;
-  };
-
-  const bgImageSrc = getBgImageSrc(contract.backgroundImageUrl);
-
-  // Dragging event handlers convert screen coordinates into SVG coordinate space (794 x 1123)
   const handleMouseDown = (fieldKey: keyof ContractFieldPositions, e: React.MouseEvent) => {
     if (!isPositioningMode || !onPositionChange) return;
     e.preventDefault();
@@ -102,7 +89,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
         </div>
       )}
 
-      {/* Main Printable Document Sheet */}
+      {/* Main Printable Document Sheet - Direct HTML/SVG Canvas without External Images */}
       <div
         id="printable-contract"
         dir="ltr"
@@ -111,14 +98,16 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
         }`}
         style={{ boxSizing: 'border-box' }}
       >
-        {/* Background Contract Template Image (Loaded from contract_template.svg or user custom image) */}
-        <img
-          src={bgImageSrc}
-          alt="نموذج العقد"
-          className="w-full h-full object-fill absolute inset-0 pointer-events-none select-none"
-        />
+        {/* Background Image Layer (Rendered only if backgroundImageUrl is specified) */}
+        {contract.backgroundImageUrl && (
+          <img
+            src={contract.backgroundImageUrl}
+            alt="خلفية نموذج العقد"
+            className="w-full h-full object-fill absolute inset-0 pointer-events-none select-none"
+          />
+        )}
 
-        {/* Dynamic Interactive Overlay SVG Layer for Text Fields */}
+        {/* Dynamic Text Fields and Drag SVG Overlay */}
         <svg
           ref={svgRef}
           xmlns="http://www.w3.org/2000/svg"
@@ -132,7 +121,10 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           }`}
           style={{ width: '100%', height: '100%' }}
         >
-          {/* Dynamic Contract Preamble Text Fields in Extra-Bold Font Matching Template */}
+          {/* Paper Canvas (Transparent if background image is present, white if not) */}
+          <rect width="794" height="1123" fill={contract.backgroundImageUrl ? 'transparent' : '#ffffff'} />
+
+          {/* Dynamic Contract Preamble Text Fields */}
           <g
             fontFamily="'Traditional Arabic', 'Amiri', 'Segoe UI', 'Sakkal Majalla', serif, sans-serif"
             fill="#000000"
@@ -169,7 +161,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </text>
             </g>
 
-            {/* Start Hijri Date (Numbers only format right-to-left) */}
+            {/* Start Hijri Date */}
             <g {...getDraggableProps('startHijriDate')}>
               <text
                 x={pos.startHijriDate.x}
@@ -201,7 +193,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </text>
             </g>
 
-            {/* End Hijri Date (Numbers only format right-to-left) */}
+            {/* End Hijri Date */}
             <g {...getDraggableProps('endHijriDate')}>
               <text
                 x={pos.endHijriDate.x}
@@ -218,7 +210,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </text>
             </g>
 
-            {/* Second Party (Client Name) - Bold */}
+            {/* Second Party (Client Name) */}
             <g {...getDraggableProps('secondPartyName')}>
               <text
                 x={pos.secondPartyName.x}
@@ -235,7 +227,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </text>
             </g>
 
-            {/* Second Party Address - Bold */}
+            {/* Second Party Address */}
             <g {...getDraggableProps('secondPartyAddress')}>
               <text
                 x={pos.secondPartyAddress.x}
@@ -254,7 +246,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           </g>
         </svg>
 
-        {/* Location Google Maps QR Code Overlay (Clean HTML Div to avoid foreignObject html2canvas freeze) */}
+        {/* Location Google Maps QR Code Overlay */}
         {contract.showLocationQr && contract.googleMapsUrl && (
           <div
             style={{
@@ -284,3 +276,4 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
     </div>
   );
 };
+

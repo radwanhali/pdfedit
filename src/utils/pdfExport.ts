@@ -9,44 +9,6 @@ export function printDocument() {
   }
 }
 
-async function convertImgToDataUrl(img: HTMLImageElement): Promise<string | null> {
-  if (!img.src || img.src.startsWith('data:')) {
-    return img.src || null;
-  }
-
-  // Strategy 1: Render onto offscreen canvas
-  try {
-    const canvas = document.createElement('canvas');
-    canvas.width = img.naturalWidth || img.clientWidth || 794;
-    canvas.height = img.naturalHeight || img.clientHeight || 1123;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/png');
-      if (dataUrl && dataUrl.length > 200) {
-        return dataUrl;
-      }
-    }
-  } catch {
-    // Ignore canvas CORS taint error and try fetch
-  }
-
-  // Strategy 2: Fetch blob and convert via FileReader
-  try {
-    const response = await fetch(img.src);
-    const blob = await response.blob();
-    return await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  } catch (err) {
-    console.warn('Image fetch to Data URL failed:', err);
-    return null;
-  }
-}
-
 export async function exportToPdf(elementId: string, filename: string): Promise<void> {
   const element = document.getElementById(elementId);
   if (!element) {
@@ -64,18 +26,7 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
       allowTaint: true,
       logging: false,
       backgroundColor: '#ffffff',
-      onclone: async (clonedDoc) => {
-        // Pre-process all images in the cloned document to base64 Data URLs
-        const images = Array.from(clonedDoc.querySelectorAll('img'));
-        for (const img of images) {
-          if (img.src && !img.src.startsWith('data:')) {
-            const dataUrl = await convertImgToDataUrl(img);
-            if (dataUrl) {
-              img.src = dataUrl;
-            }
-          }
-        }
-
+      onclone: (clonedDoc) => {
         // Fix for html2canvas unsupported 'oklch' color function in Tailwind CSS v4
         const styleElements = clonedDoc.querySelectorAll('style');
         styleElements.forEach((styleEl) => {
@@ -123,6 +74,3 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
     throw error;
   }
 }
-
-
-
