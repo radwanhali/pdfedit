@@ -1,0 +1,6 @@
+{
+  "name": "نظام عقود سبائك الماسة",
+  "description": "إدارة وإنشاء اتفاقيات الخدمة وتوليد QR للخرائط والتصدير بصيغة PDF وطباعتها بحجم A4",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

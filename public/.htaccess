@@ -1,0 +1,24 @@
+DirectoryIndex index.html
+
+# تعطيل محرك Node.js/Passenger لتنفيذ هذا المجلد كملفات استاتيكية فقط
+<IfModule mod_passenger.c>
+  PassengerEnabled off
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  
+  # تحديد أن القاعدة تنطبق على المجلد الفرعي فقط
+  RewriteBase /masa/
+  
+  # إذا كان الطلب لملف index.html، اتركه يمر
+  RewriteRule ^index\.html$ - [L]
+  
+  # إذا كان الطلب لملف حقيقي أو مجلد حقيقي (مثل الصور والـ JS)، اتركه يمر
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  
+  # أي مسار آخر، قم بتوجيهه داخلياً إلى index.html الخاص بالمجلد الفرعي
+  RewriteRule . /masa/index.html [L]
+</IfModule>
+

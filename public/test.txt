@@ -1,0 +1,1 @@
+OK - Static file serving is working!

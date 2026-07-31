@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 794 1123" width="794" height="1123">
+  <!-- White Background Paper -->
+  <rect width="794" height="1123" fill="#ffffff"/>
+
+  <!-- Top Header Section -->
+  <!-- Left Header (English - Red Maroon) -->
+  <g fill="#800000" font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
+    <text x="40" y="42" font-size="13" font-weight="800">Al Masa Alloys Corporation</text>
+    <text x="40" y="60" font-size="11" font-weight="700">add/ Riyadh, Al Nour district</text>
+    <text x="40" y="78" font-size="11" font-weight="700">vat : 310122348700003</text>
+  </g>
+
+  <!-- Center Logo Graphic -->
+  <g transform="translate(357, 16)">
+    <polygon points="40,5 75,30 60,75 20,75 5,30" fill="#2b4c7e" />
+    <polygon points="40,5 75,30 40,40" fill="#3b639e" />
+    <polygon points="40,5 5,30 40,40" fill="#1e3559" />
+    <polygon points="5,30 20,75 40,40" fill="#2b4c7e" />
+    <polygon points="75,30 60,75 40,40" fill="#c07330" />
+    <polygon points="20,75 60,75 40,40" fill="#1a2d4b" />
+    <text x="40" y="90" text-anchor="middle" font-family="'Traditional Arabic', 'Amiri', 'Segoe UI', sans-serif" font-size="15" font-weight="900" fill="#000000">سبائك الماسة</text>
+    <text x="40" y="100" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="800" fill="#2b4c7e" letter-spacing="1">SABAIK ALMASA</text>
+  </g>
+
+  <!-- Right Header (Arabic - Red Maroon) -->
+  <g fill="#800000" font-family="'Traditional Arabic', 'Amiri', 'Segoe UI', sans-serif" direction="rtl" text-anchor="end">
+    <text x="754" y="42" font-size="14" font-weight="800">مؤسسة سبائك الماسة</text>
+    <text x="754" y="60" font-size="11" font-weight="700">العنوان : الرياض حي النور شارع الحصيبا</text>
+    <text x="754" y="78" font-size="11" font-weight="700">الرقم الضريبي : 310122348700003</text>
+  </g>
+
+  <!-- Service Agreement Title Bar (Blue) -->
+  <rect x="40" y="132" width="714" height="28" fill="#5b859a"/>
+  <text x="397" y="151" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="14.5" font-weight="bold" fill="#ffffff">اتفاقية خدمة</text>
+
+  <!-- Preamble Static Text Labels -->
+  <g font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="bold" fill="#000000" direction="rtl" text-anchor="end">
+    <text x="754" y="190">بعون الله ابرم هذا العقد رقم</text>
+    <text x="525" y="190">في تاريخ</text>
+    <text x="395" y="190">الموافق</text>
+    <text x="210" y="190">و ينتهي في تاريخ</text>
+
+    <text x="754" y="214">الموافق</text>
+
+    <text x="754" y="238">بين كل من :</text>
+
+    <text x="754" y="262">1- مؤسسة سبائك الماسة للمقاولات سجل تجاري 1010893280 (طرف اول)</text>
+
+    <text x="754" y="288">2-</text>
+
+    <text x="754" y="314">العنوان :</text>
+
+    <text x="754" y="342">اتفق الطرفان على الاتي :</text>
+  </g>
+
+  <!-- Section 1: General Terms -->
+  <rect x="40" y="362" width="714" height="26" fill="#5b859a"/>
+  <text x="744" y="379" text-anchor="end" font-family="'Segoe UI', sans-serif" font-size="13" font-weight="bold" fill="#ffffff">أولاً:- البنود العامة</text>
+
+  <g font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="bold" fill="#000000" direction="rtl" text-anchor="end">
+    <text x="754" y="404">1-   تم استلام الحاوية بواسطة المستأجر ويتم إخلاؤها بعد إنهاء العقد علماً بأنه أصبح مسئول عن الحاوية مسئولية كاملة وذلك خلال مدة سريان هذا العقد.</text>
+    <text x="754" y="426">2-   يتحمل المستأجر قيمة الغرامات والمخالفات الصادرة من الجهات المختصة في حال عدم وضع النفايات داخل الحاوية أو في حالة استخدامها في غير</text>
+    <text x="728" y="443">الغرض الذى خصصت له.</text>
+    <text x="754" y="465">3-   يلتزم المستأجر بعدم إلقاء المخلفات الصلبة مثل الحديد والأخشاب والبلوك والرمل وخلافه وفي حال ذلك يتحمل المستأجر قيمة استبدال الحاوية بحاوية</text>
+    <text x="728" y="482">أخرى.</text>
+    <text x="754" y="504">4-   لا يحق للمستأجر فسخ العقد إلا بعد أخذ موافقة خطية من إدارة النظافة بالأمانة.</text>
+    <text x="754" y="526">5-   يتعهد المستأجر بتوفير حيز مناسب للحاوية على أن يكون في نطاق الارتداد الخاص به.</text>
+    <text x="754" y="548">6-   تم سداد 10% من قيمة ايجار الحاوية.</text>
+  </g>
+
+  <!-- Section 2: Technical Offer -->
+  <rect x="40" y="570" width="714" height="26" fill="#5b859a"/>
+  <text x="744" y="587" text-anchor="end" font-family="'Segoe UI', sans-serif" font-size="13" font-weight="bold" fill="#ffffff">ثانياً:- العرض الفني</text>
+
+  <g font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="bold" fill="#000000" direction="rtl" text-anchor="end">
+    <text x="754" y="612">1-   نوع الخدمة : يقوم الطرف الأول بتقديم خدمة إزالة النفايات من موقع العميل.</text>
+    <text x="754" y="634">2-   يلتزم الطرف الأول بتوفير حاوية نفايات حسب المقاس المتفق عليه بالعقد وتلتزم بتفريغ الحاوية في الاوقات المحددة كما ورد في قانون المرور بالرياض.</text>
+  </g>
+
+  <!-- Service Table Frame -->
+  <rect x="40" y="662" width="714" height="28" fill="#cd9158" stroke="#000000" stroke-width="1.5"/>
+  <rect x="40" y="690" width="714" height="32" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <line x1="220" y1="662" x2="220" y2="722" stroke="#000000" stroke-width="1.5"/>
+  <line x1="600" y1="662" x2="600" y2="722" stroke="#000000" stroke-width="1.5"/>
+
+  <text x="130" y="681" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="bold" fill="#000000">العدد</text>
+  <text x="410" y="681" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="bold" fill="#000000">وصف الخدمة</text>
+  <text x="677" y="681" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="bold" fill="#000000">نوع الخدمة</text>
+
+  <!-- Notes Row Frame -->
+  <rect x="40" y="730" width="714" height="28" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <rect x="640" y="730" width="114" height="28" fill="#cd9158" stroke="#000000" stroke-width="1.5"/>
+  <text x="697" y="749" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="bold" fill="#000000">الملاحظات</text>
+
+  <!-- Signatures & Seal -->
+  <text x="220" y="800" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="13" font-weight="bold" fill="#000000">الطرف الثاني</text>
+  <text x="570" y="800" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="13" font-weight="bold" fill="#000000">الطرف الأول</text>
+
+  <!-- First Party Oval Stamp Seal -->
+  <g transform="translate(512, 810)">
+    <ellipse cx="60" cy="32" rx="55" ry="26" fill="none" stroke="#1b365d" stroke-width="2" stroke-dasharray="4 2"/>
+    <ellipse cx="60" cy="32" rx="50" ry="22" fill="none" stroke="#1b365d" stroke-width="1.5"/>
+    <text x="60" y="24" text-anchor="middle" font-family="sans-serif" font-size="7.5" font-weight="900" fill="#1b365d">مؤسسة سبائك الماسة للمقاولات</text>
+    <text x="60" y="34" text-anchor="middle" font-family="sans-serif" font-size="7" font-weight="bold" fill="#1b365d">قسم الحاويات</text>
+    <text x="60" y="42" text-anchor="middle" font-family="sans-serif" font-size="6.5" font-weight="bold" fill="#1b365d">س.ت: 1010893280</text>
+    <text x="60" y="50" text-anchor="middle" font-family="sans-serif" font-size="5.5" font-weight="bold" fill="#1b365d">SABAIK ALMASAH CONTRACTING EST.</text>
+  </g>
+
+  <!-- Footer Section -->
+  <g fill="#800000" font-family="'Segoe UI', sans-serif" font-size="10.5" font-weight="bold">
+    <text x="754" y="1035" text-anchor="end">العنوان : الرياض حي النور شارع الحصيبا</text>
+    <text x="40" y="1035" text-anchor="start">0555888767 : رقم الهاتف</text>
+    <text x="754" y="1053" text-anchor="end">السجل التجاري : 1010893280</text>
+    <text x="40" y="1053" text-anchor="start">14813 : الرمز البريدي</text>
+  </g>
+
+  <!-- Bottom Blue Strip -->
+  <rect x="40" y="1066" width="714" height="22" fill="#5b859a"/>
+  <text x="397" y="1081" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="11" font-weight="bold" fill="#ffffff">صفحة 1 من 1</text>
+</svg>
