@@ -72,7 +72,8 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
     pdf.save(cleanFilename);
   } catch (error) {
     console.error('Error generating PDF:', error);
-    throw error;
+    // Fallback to print window if PDF generation fails so user can save via browser
+    window.print();
   }
 }
 
