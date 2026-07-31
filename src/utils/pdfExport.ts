@@ -28,9 +28,28 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
       logging: false,
       backgroundColor: '#ffffff',
       onclone: (clonedDoc) => {
+        // Fix for html2canvas unsupported 'oklch' color function in Tailwind CSS v4
+        const styleElements = clonedDoc.querySelectorAll('style');
+        styleElements.forEach((styleEl) => {
+          if (styleEl.textContent) {
+            styleEl.textContent = styleEl.textContent.replace(
+              /oklch\([^)]+\)/gi,
+              '#1e293b'
+            );
+          }
+        });
+
+        // Clean inline styles on elements in cloned document
+        const allElements = clonedDoc.querySelectorAll('*');
+        allElements.forEach((el) => {
+          const styleAttr = el.getAttribute('style');
+          if (styleAttr && styleAttr.includes('oklch')) {
+            el.setAttribute('style', styleAttr.replace(/oklch\([^)]+\)/gi, '#1e293b'));
+          }
+        });
+
         const clonedElement = clonedDoc.getElementById(elementId);
         if (clonedElement) {
-          // Remove positioning helper rings/borders if positioning mode was active
           clonedElement.classList.remove('ring-2', 'ring-blue-500/50');
         }
       },

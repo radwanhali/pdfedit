@@ -14,35 +14,31 @@
     margin: 0;
   }
 
-  /* Hide non-printable elements */
-  header,
-  nav,
-  aside,
-  button,
-  .print\:hidden {
-    display: none !important;
+  /* Hide everything on page by default during print */
+  body * {
+    visibility: hidden !important;
   }
 
+  /* Make only the contract document and its children visible */
   #printable-contract,
   #printable-contract * {
     visibility: visible !important;
   }
 
   #printable-contract {
-    position: absolute !important;
+    position: fixed !important;
     left: 0 !important;
     top: 0 !important;
     width: 210mm !important;
     height: 297mm !important;
-    max-height: 297mm !important;
     margin: 0 !important;
-    padding: 8mm 12mm 6mm 12mm !important;
+    padding: 0 !important;
     box-shadow: none !important;
     border: none !important;
-    overflow: hidden !important;
-    page-break-after: avoid !important;
-    page-break-before: avoid !important;
-    page-break-inside: avoid !important;
+    background: #ffffff !important;
+    z-index: 999999 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 

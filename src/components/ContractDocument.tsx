@@ -29,7 +29,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
     if (url && (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://'))) {
       return url;
     }
-    const baseUrl = import.meta.env.BASE_URL || './';
+    const baseUrl = (import.meta as any).env?.BASE_URL || './';
     const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
     return `${cleanBase}contract_template.svg`;
   };
@@ -111,14 +111,12 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
         }`}
         style={{ boxSizing: 'border-box' }}
       >
-        {/* Background Contract Image (Rendered if useBackgroundImage is true) */}
-        {contract.useBackgroundImage !== false && (
-          <img
-            src={bgImageSrc}
-            alt="نموذج العقد"
-            className="w-full h-full object-fill absolute inset-0 pointer-events-none select-none"
-          />
-        )}
+        {/* Background Contract Template Image */}
+        <img
+          src={bgImageSrc}
+          alt="نموذج العقد"
+          className="w-full h-full object-fill absolute inset-0 pointer-events-none select-none"
+        />
 
         {/* Dynamic Interactive Overlay SVG Layer for Text Fields */}
         <svg

@@ -285,66 +285,12 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
         </div>
       </div>
 
-      {/* Section 4: Contract Background Image / Official Paper */}
-      <div className="space-y-4 pt-2 border-t border-slate-100">
-        <div className="flex items-center justify-between bg-slate-100/80 p-2.5 rounded-lg border border-slate-200">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
-            <Image className="w-4 h-4 text-purple-600" />
-            <span>4. صورة ورقة العقد / الورق المروّس</span>
-          </div>
-
-          <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer bg-white px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">
-            <input
-              type="checkbox"
-              checked={contract.useBackgroundImage !== false}
-              onChange={(e) => updateField('useBackgroundImage', e.target.checked)}
-              className="rounded text-purple-600 focus:ring-purple-500"
-            />
-            إظهار صورة خلفية العقد
-          </label>
-        </div>
-
-        <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-3">
-          <p className="text-xs text-slate-600 leading-relaxed">
-            يمكنك استخدام نموذج العقد المدمج افتراضياً، أو رفع صورة ورقة العقد الخاصة بمؤسستك (PNG / JPG / SVG)، أو إلغاء تفعيل الخلفية للطباعة المباشرة على الورق المروّس الجاهز.
-          </p>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-medium cursor-pointer transition-colors flex items-center gap-2 shadow-xs">
-              <Upload className="w-3.5 h-3.5" />
-              <span>رفع صورة العقد الأصلية</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-            </label>
-
-            {contract.backgroundImageUrl && (
-              <button
-                type="button"
-                onClick={handleResetImage}
-                className="px-3 py-2 bg-white border border-slate-300 text-slate-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>استعادة النموذج الافتراضي</span>
-              </button>
-            )}
-
-            <span className="text-[11px] text-slate-500 font-medium">
-              {contract.backgroundImageUrl ? 'تم استخدام صورة مخصصة' : 'النموذج الافتراضي المدمج مفعّل'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Section 5: Position Fine-Tuning */}
+      {/* Section 4: Position Fine-Tuning */}
       <div className="space-y-4 pt-2 border-t border-slate-100">
         <div className="flex items-center justify-between bg-amber-50 p-2.5 rounded-lg border border-amber-200">
           <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
             <Move className="w-4 h-4 text-amber-600" />
-            <span>5. ضبط مواضع الحقول على الصورة</span>
+            <span>4. ضبط مواضع الحقول على صورة العقد</span>
           </div>
 
 
