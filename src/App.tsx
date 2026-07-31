@@ -13,7 +13,8 @@ import { Header } from './components/Header';
 import { ContractEditor } from './components/ContractEditor';
 import { ContractDocument } from './components/ContractDocument';
 import { ContractList } from './components/ContractList';
-import { Save, CheckCircle, Printer, Download, Sparkles, Move } from 'lucide-react';
+import { Save, CheckCircle, Printer, Download, Sparkles, Move, Loader2 } from 'lucide-react';
+
 
 export default function App() {
   const [contracts, setContracts] = useState<ContractData[]>(() => loadContractsFromStorage());
@@ -26,7 +27,9 @@ export default function App() {
   const [showSidebar, setShowSidebar] = useState<boolean>(true);
   const [isSaved, setIsSaved] = useState<boolean>(true);
   const [isPositioningMode, setIsPositioningMode] = useState<boolean>(false);
+  const [isExportingPdf, setIsExportingPdf] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
 
   // Get active contract
   const activeContract = contracts.find((c) => c.id === selectedContractId) || contracts[0] || INITIAL_CONTRACT;
@@ -112,10 +115,21 @@ export default function App() {
     showToast('تم استيراد قائمة العقود بنجاح');
   };
 
-  const handleExportPdf = () => {
-    const filename = `اتفاقية_خدمة_عقد_${activeContract.contractNumber || 'جديد'}.pdf`;
-    exportToPdf('printable-contract', filename);
-    showToast('جاري تجهيز وتحميل ملف الـ PDF...');
+  const handleExportPdf = async () => {
+    if (isExportingPdf) return;
+    setIsExportingPdf(true);
+    showToast('جاري استخراج وتحميل ملف الـ PDF مباشرة...');
+
+    try {
+      const filename = `اتفاقية_خدمة_عقد_${activeContract.contractNumber || 'جديد'}.pdf`;
+      await exportToPdf('printable-contract', filename);
+      showToast('تم تحميل ملف الـ PDF بنجاح!');
+    } catch (err) {
+      console.error('PDF export failed:', err);
+      showToast('حدث خطأ أثناء استخراج PDF، يرجى المحاولة مرة أخرى');
+    } finally {
+      setIsExportingPdf(false);
+    }
   };
 
   const handlePrint = () => {
@@ -140,11 +154,13 @@ export default function App() {
         setViewMode={setViewMode}
         onPrint={handlePrint}
         onExportPdf={handleExportPdf}
+        isExportingPdf={isExportingPdf}
         onCreateNew={handleCreateNewContract}
         onSave={handleSaveContract}
         showSidebar={showSidebar}
         toggleSidebar={() => setShowSidebar(!showSidebar)}
       />
+
 
       {/* Main Workspace */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -235,11 +251,19 @@ export default function App() {
 
                   <button
                     onClick={handleExportPdf}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-md text-xs transition-colors flex items-center gap-1 shadow-xs"
+                    disabled={isExportingPdf}
+                    className={`bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-md text-xs transition-colors flex items-center gap-1 shadow-xs ${
+                      isExportingPdf ? 'opacity-70 cursor-wait' : ''
+                    }`}
                   >
-                    <Download className="w-3 h-3" />
-                    تصدير PDF
+                    {isExportingPdf ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Download className="w-3 h-3" />
+                    )}
+                    {isExportingPdf ? 'جاري التصدير...' : 'تصدير PDF'}
                   </button>
+
                   <button
                     onClick={handlePrint}
                     className="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-2.5 py-1 rounded-md text-xs transition-colors flex items-center gap-1"

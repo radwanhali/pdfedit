@@ -1,72 +1,61 @@
-// @ts-ignore
-import html2pdf from 'html2pdf.js';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 export function printDocument() {
-  window.print();
+  try {
+    window.print();
+  } catch (err) {
+    console.error('Print failed:', err);
+  }
 }
 
 export async function exportToPdf(elementId: string, filename: string): Promise<void> {
   const element = document.getElementById(elementId);
   if (!element) {
     console.error(`Element with id "${elementId}" not found for PDF export.`);
-    return;
+    throw new Error('عنصر العقد غير موجود للطباعة');
   }
 
-  // Configuration options for html2pdf
-  const opt = {
-    margin: [0, 0, 0, 0] as [number, number, number, number],
-    filename: filename.endsWith('.pdf') ? filename : `${filename}.pdf`,
-    image: { type: 'jpeg' as const, quality: 0.98 },
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      letterRendering: true,
-      onclone: (clonedDoc: Document) => {
-        // Fix for html2canvas unsupported 'oklch' color function in Tailwind CSS v4
-        const styleElements = clonedDoc.querySelectorAll('style');
-        styleElements.forEach((styleEl) => {
-          if (styleEl.textContent && styleEl.textContent.includes('oklch')) {
-            // Replace all oklch(...) color definitions with a safe fallback hex color
-            styleEl.textContent = styleEl.textContent.replace(
-              /oklch\([^)]+\)/gi,
-              '#1e293b'
-            );
-          }
-        });
-
-        // Clean inline styles on elements in cloned document
-        const allElements = clonedDoc.querySelectorAll('*');
-        allElements.forEach((el) => {
-          const styleAttr = el.getAttribute('style');
-          if (styleAttr && styleAttr.includes('oklch')) {
-            el.setAttribute('style', styleAttr.replace(/oklch\([^)]+\)/gi, '#1e293b'));
-          }
-        });
-
-        // Ensure positioning helper outlines/rectangles are hidden in PDF output
-        const clonedContract = clonedDoc.getElementById(elementId);
-        if (clonedContract) {
-          clonedContract.classList.remove('ring-2', 'ring-blue-500/50');
-          const positioningRects = clonedContract.querySelectorAll('rect[stroke="#3b82f6"]');
-          positioningRects.forEach((r) => r.remove());
-        }
-      }
-    },
-    jsPDF: {
-      unit: 'mm' as const,
-      format: 'a4' as const,
-      orientation: 'portrait' as const
-    }
-  };
+  // Final filename check
+  const cleanFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
 
   try {
-    await html2pdf().set(opt).from(element).save();
+    // Render element to canvas using html2canvas
+    const canvas = await html2canvas(element, {
+      scale: 2, // High resolution for crisp PDF text and QR code
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+      backgroundColor: '#ffffff',
+      onclone: (clonedDoc) => {
+        const clonedElement = clonedDoc.getElementById(elementId);
+        if (clonedElement) {
+          // Remove positioning helper rings/borders if positioning mode was active
+          clonedElement.classList.remove('ring-2', 'ring-blue-500/50');
+        }
+      },
+    });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+    // Create jsPDF instance (A4 size: 210mm x 297mm)
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      compress: true,
+    });
+
+    // Fit image exactly to A4 page dimensions
+    pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+
+    // Trigger direct browser file download
+    pdf.save(cleanFilename);
   } catch (error) {
     console.error('Error generating PDF:', error);
-    // Fallback to print if html2pdf encounters an issue
-    printDocument();
+    throw error;
   }
 }
+
 
 

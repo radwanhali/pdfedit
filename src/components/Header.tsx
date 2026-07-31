@@ -1,5 +1,5 @@
 import React from 'react';
-import { Printer, Download, Plus, FileSpreadsheet, Eye, Edit3, Save, Check } from 'lucide-react';
+import { Printer, Download, Plus, FileSpreadsheet, Eye, Edit3, Save, Check, Loader2 } from 'lucide-react';
 
 interface HeaderProps {
   contractNumber: string;
@@ -8,6 +8,7 @@ interface HeaderProps {
   setViewMode: (mode: 'edit' | 'preview' | 'split') => void;
   onPrint: () => void;
   onExportPdf: () => void;
+  isExportingPdf?: boolean;
   onCreateNew: () => void;
   onSave: () => void;
   showSidebar: boolean;
@@ -21,11 +22,13 @@ export const Header: React.FC<HeaderProps> = ({
   setViewMode,
   onPrint,
   onExportPdf,
+  isExportingPdf = false,
   onCreateNew,
   onSave,
   showSidebar,
   toggleSidebar,
 }) => {
+
   return (
     <header className="bg-white text-slate-800 border-b border-slate-200 sticky top-0 z-40 shadow-xs print:hidden" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
@@ -113,11 +116,21 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Download PDF button */}
           <button
             onClick={onExportPdf}
-            className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium transition-all flex items-center gap-1.5 shadow-xs"
+            disabled={isExportingPdf}
+            className={`px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium transition-all flex items-center gap-1.5 shadow-xs ${
+              isExportingPdf ? 'opacity-70 cursor-wait' : ''
+            }`}
           >
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">تصدير PDF</span>
+            {isExportingPdf ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+            <span className="hidden sm:inline">
+              {isExportingPdf ? 'جاري التصدير...' : 'تصدير PDF'}
+            </span>
           </button>
+
 
           {/* Print button */}
           <button

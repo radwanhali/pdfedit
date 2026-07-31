@@ -111,14 +111,16 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
         }`}
         style={{ boxSizing: 'border-box' }}
       >
-        {/* Background Contract Image */}
-        <img
-          src={bgImageSrc}
-          alt="نموذج العقد"
-          className="w-full h-full object-fill absolute inset-0 pointer-events-none select-none"
-        />
+        {/* Background Contract Image (Rendered if useBackgroundImage is true) */}
+        {contract.useBackgroundImage !== false && (
+          <img
+            src={bgImageSrc}
+            alt="نموذج العقد"
+            className="w-full h-full object-fill absolute inset-0 pointer-events-none select-none"
+          />
+        )}
 
-        {/* Dynamic Interactive Overlay SVG Layer */}
+        {/* Dynamic Interactive Overlay SVG Layer for Text Fields */}
         <svg
           ref={svgRef}
           xmlns="http://www.w3.org/2000/svg"
@@ -252,27 +254,34 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </text>
             </g>
           </g>
-
-          {/* Location Google Maps QR Code ONLY (Placed right next to the original printed QR code) */}
-          {contract.showLocationQr && contract.googleMapsUrl && (
-            <g {...getDraggableProps('locationQr')}>
-              <foreignObject x={pos.locationQr.x} y={pos.locationQr.y} width="72" height="72">
-                <div
-                  className={`bg-white p-1 rounded border border-slate-300 shadow-sm flex items-center justify-center w-full h-full ${
-                    isPositioningMode ? 'ring-2 ring-emerald-500' : ''
-                  }`}
-                >
-                  <QRCodeSVG
-                    value={contract.googleMapsUrl}
-                    size={64}
-                    level="M"
-                    fgColor="#000000"
-                  />
-                </div>
-              </foreignObject>
-            </g>
-          )}
         </svg>
+
+        {/* Location Google Maps QR Code Overlay (Clean HTML Div to avoid foreignObject html2canvas freeze) */}
+        {contract.showLocationQr && contract.googleMapsUrl && (
+          <div
+            style={{
+              position: 'absolute',
+              left: `${(pos.locationQr.x / 794) * 100}%`,
+              top: `${(pos.locationQr.y / 1123) * 100}%`,
+              width: '9.06%', // 72px / 794px
+              height: '6.41%', // 72px / 1123px
+              zIndex: 20,
+            }}
+            onMouseDown={(e) => handleMouseDown('locationQr', e)}
+            className={`bg-white p-1 rounded border border-slate-300 shadow-sm flex items-center justify-center select-none ${
+              isPositioningMode ? 'cursor-move ring-2 ring-emerald-500' : 'pointer-events-none'
+            }`}
+          >
+            <QRCodeSVG
+              value={contract.googleMapsUrl}
+              size={64}
+              level="M"
+              fgColor="#000000"
+              className="w-full h-full"
+            />
+          </div>
+        )}
+
       </div>
     </div>
   );
