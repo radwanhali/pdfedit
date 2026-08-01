@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ContractData } from '../types';
 import { Plus, Search, FileEdit, Trash2, Download, Upload, Clock, AlertCircle } from 'lucide-react';
 
@@ -89,59 +90,63 @@ export const ContractList: React.FC<ContractListProps> = ({
   return (
     <div className="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden flex flex-col h-full text-right relative" dir="rtl">
       {/* Delete Confirmation Modal */}
-      {contractToDelete && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl border border-slate-200 p-5 max-w-sm w-full space-y-4 animate-in fade-in zoom-in-95">
-            <div className="flex items-center gap-3 text-red-600 font-bold text-sm">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <Trash2 className="w-5 h-5 shrink-0" />
+      {contractToDelete &&
+        createPortal(
+          <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" dir="rtl">
+            <div className="bg-white rounded-xl shadow-2xl border border-slate-200 p-5 max-w-sm w-full space-y-4 animate-in fade-in zoom-in-95">
+              <div className="flex items-center gap-3 text-red-600 font-bold text-sm">
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <Trash2 className="w-5 h-5 shrink-0" />
+                </div>
+                <span>تأكيد حذف العقد</span>
               </div>
-              <span>تأكيد حذف العقد</span>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                هل أنت متاكد من إرادتك لحذف العقد رقم <strong className="text-slate-900">#{contractToDelete.contractNumber}</strong> للعميل ({contractToDelete.secondPartyName || 'بدون اسم'})؟
+              </p>
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setContractToDelete(null)}
+                  className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDelete}
+                  className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-xs"
+                >
+                  تأكيد الحذف
+                </button>
+              </div>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              هل أنت متاكد من إرادتك لحذف العقد رقم <strong className="text-slate-900">#{contractToDelete.contractNumber}</strong> للعميل ({contractToDelete.secondPartyName || 'بدون اسم'})؟
-            </p>
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => setContractToDelete(null)}
-                className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors"
-              >
-                إلغاء
-              </button>
-              <button
-                type="button"
-                onClick={confirmDelete}
-                className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-xs"
-              >
-                تأكيد الحذف
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
 
       {/* Error / Warning Alert Modal */}
-      {errorMessage && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl border border-slate-200 p-5 max-w-sm w-full space-y-4">
-            <div className="flex items-center gap-2 text-amber-600 font-bold text-sm">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              <span>تنبيه</span>
+      {errorMessage &&
+        createPortal(
+          <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" dir="rtl">
+            <div className="bg-white rounded-xl shadow-2xl border border-slate-200 p-5 max-w-sm w-full space-y-4">
+              <div className="flex items-center gap-2 text-amber-600 font-bold text-sm">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <span>تنبيه</span>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">{errorMessage}</p>
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setErrorMessage(null)}
+                  className="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg"
+                >
+                  موافق
+                </button>
+              </div>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed">{errorMessage}</p>
-            <div className="flex justify-end pt-2">
-              <button
-                type="button"
-                onClick={() => setErrorMessage(null)}
-                className="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg"
-              >
-                موافق
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
 
       {/* Header */}
       <div className="p-4 bg-white border-b border-slate-200 flex items-center justify-between">

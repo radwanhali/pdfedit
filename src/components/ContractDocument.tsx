@@ -253,20 +253,22 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               position: 'absolute',
               left: `${(pos.locationQr.x / 794) * 100}%`,
               top: `${(pos.locationQr.y / 1123) * 100}%`,
-              width: '9.06%', // 72px / 794px
-              height: '6.41%', // 72px / 1123px
+              width: '11.5%', // 91px / 794px - enlarged size
+              height: '8.1%', // 91px / 1123px - enlarged size
               zIndex: 20,
             }}
             onMouseDown={(e) => handleMouseDown('locationQr', e)}
-            className={`bg-white p-1 rounded border border-slate-300 shadow-sm flex items-center justify-center select-none ${
-              isPositioningMode ? 'cursor-move ring-2 ring-emerald-500' : 'pointer-events-none'
+            className={`flex items-center justify-center select-none bg-transparent ${
+              isPositioningMode ? 'cursor-move ring-2 ring-emerald-500 rounded p-1 bg-emerald-50/50' : 'pointer-events-none'
             }`}
+            title={isPositioningMode ? 'اسحب لتحريك كيو ار الخريطة' : undefined}
           >
             <QRCodeSVG
               value={contract.googleMapsUrl}
-              size={64}
+              size={90}
               level="M"
               fgColor="#000000"
+              bgColor="transparent"
               className="w-full h-full"
             />
           </div>

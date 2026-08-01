@@ -9,6 +9,36 @@ export function printDocument() {
   }
 }
 
+/**
+ * Converts image source URLs inside an element to base64 data URLs
+ * to ensure html2canvas can capture them without CORS/taint errors.
+ */
+async function preConvertImagesToDataUrls(container: HTMLElement): Promise<void> {
+  const images = Array.from(container.querySelectorAll('img'));
+  
+  for (const img of images) {
+    const src = img.getAttribute('src');
+    if (!src || src.startsWith('data:')) continue;
+
+    try {
+      const response = await fetch(src);
+      const blob = await response.blob();
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === 'string') resolve(reader.result);
+          else reject(new Error('Failed to convert blob to data URL'));
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      img.setAttribute('src', dataUrl);
+    } catch (err) {
+      console.warn('Failed to pre-convert image to data URL:', src, err);
+    }
+  }
+}
+
 export async function exportToPdf(elementId: string, filename: string): Promise<void> {
   const element = document.getElementById(elementId);
   if (!element) {
@@ -19,11 +49,14 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
   const cleanFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
 
   try {
+    // Pre-convert all images to Base64 data URLs before capturing to prevent canvas taint
+    await preConvertImagesToDataUrls(element);
+
     // Render element to canvas using html2canvas
     const canvas = await html2canvas(element, {
       scale: 2, // High resolution for crisp PDF text and QR code
       useCORS: true,
-      allowTaint: true,
+      allowTaint: false, // Critical: Must be false so canvas.toDataURL() never fails
       logging: false,
       backgroundColor: '#ffffff',
       onclone: (clonedDoc) => {
