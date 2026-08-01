@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ContractData, ContractFieldPositions } from '../types';
 import { ContractDocument } from './ContractDocument';
-import { X, Move, Eye, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { X, Move, Eye, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 interface ContractPreviewModalProps {
   isOpen: boolean;
@@ -22,12 +22,44 @@ export const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
   onPositionsChange,
 }) => {
   const [zoomScale, setZoomScale] = useState<number>(1);
+  const initialPinchDistRef = useRef<number | null>(null);
+  const initialZoomRef = useRef<number>(1);
 
   if (!isOpen) return null;
 
-  const handleZoomIn = () => setZoomScale((prev) => Math.min(prev + 0.15, 1.5));
-  const handleZoomOut = () => setZoomScale((prev) => Math.max(prev - 0.15, 0.4));
+  const handleZoomIn = () => setZoomScale((prev) => Math.min(Number((prev + 0.15).toFixed(2)), 2.5));
+  const handleZoomOut = () => setZoomScale((prev) => Math.max(Number((prev - 0.15).toFixed(2)), 0.4));
   const handleResetZoom = () => setZoomScale(1);
+
+  // Multi-touch pinch-to-zoom gesture handlers for Mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      initialPinchDistRef.current = dist;
+      initialZoomRef.current = zoomScale;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && initialPinchDistRef.current !== null && initialPinchDistRef.current > 0) {
+      const currentDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const ratio = currentDist / initialPinchDistRef.current;
+      const newZoom = Math.min(Math.max(initialZoomRef.current * ratio, 0.4), 2.5);
+      setZoomScale(Number(newZoom.toFixed(2)));
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (e.touches.length < 2) {
+      initialPinchDistRef.current = null;
+    }
+  };
 
   return createPortal(
     <div
@@ -35,9 +67,9 @@ export const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
       dir="rtl"
     >
       {/* Modal Box Container */}
-      <div className="bg-slate-100 rounded-2xl shadow-2xl border border-slate-300 w-full max-w-5xl h-full max-h-[96vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 my-auto">
+      <div className="bg-slate-100 rounded-2xl shadow-2xl border border-slate-300 w-full max-w-5xl h-full max-h-[96vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 my-auto relative">
         {/* Modal Top Header Bar */}
-        <div className="bg-white border-b border-slate-200 px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2 shadow-2xs shrink-0">
+        <div className="bg-white border-b border-slate-200 px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2 shadow-2xs shrink-0 z-20">
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
               <Eye className="w-5 h-5" />
@@ -111,7 +143,7 @@ export const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
 
         {/* Positioning Mode Notification Banner */}
         {isPositioningMode && (
-          <div className="bg-amber-500 text-white text-xs px-3 py-1.5 flex items-center justify-between font-semibold shrink-0">
+          <div className="bg-amber-500 text-white text-xs px-3 py-1.5 flex items-center justify-between font-semibold shrink-0 z-20">
             <div className="flex items-center gap-2">
               <Move className="w-3.5 h-3.5 animate-bounce shrink-0" />
               <span>وضع تحريك الحقول مفعل: اضغط مع الاستمرار واسحب أي نص أو كيو ار الخريطة بيدك إلى مكانه.</span>
@@ -125,10 +157,15 @@ export const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
           </div>
         )}
 
-        {/* Modal Body: Responsive Scrollable A4 Sheet Canvas */}
-        <div className="p-2 sm:p-6 bg-slate-200/80 overflow-auto flex-1 flex justify-center items-start min-h-0 w-full touch-pan-x touch-pan-y">
+        {/* Modal Body: Responsive Scrollable Canvas with Pinch-to-Zoom Touch Listener */}
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="p-2 sm:p-6 bg-slate-200/80 overflow-auto flex-1 flex justify-center items-start min-h-0 w-full relative select-none touch-pan-x touch-pan-y"
+        >
           <div
-            className="transition-transform duration-100 ease-out origin-top w-full max-w-[794px] bg-white shadow-2xl rounded-sm overflow-hidden"
+            className="transition-transform duration-75 ease-out origin-top w-full max-w-[794px] bg-white shadow-2xl rounded-sm overflow-hidden"
             style={{
               transform: `scale(${zoomScale})`,
               marginBottom: zoomScale < 1 ? `-${(1 - zoomScale) * 100}%` : '0px',
@@ -139,6 +176,31 @@ export const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
               isPositioningMode={isPositioningMode}
               onPositionChange={onPositionsChange}
             />
+          </div>
+
+          {/* Quick Floating Zoom Overlay for Mobile */}
+          <div className="fixed bottom-6 left-6 z-30 sm:hidden flex items-center gap-1 bg-slate-900/90 text-white p-1 rounded-full shadow-2xl border border-slate-700/80 backdrop-blur-md">
+            <button
+              type="button"
+              onClick={handleZoomOut}
+              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-800 active:bg-slate-700 text-white"
+            >
+              <ZoomOut className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleResetZoom}
+              className="px-2 text-xs font-mono font-bold"
+            >
+              {Math.round(zoomScale * 100)}%
+            </button>
+            <button
+              type="button"
+              onClick={handleZoomIn}
+              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-800 active:bg-slate-700 text-white"
+            >
+              <ZoomIn className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>

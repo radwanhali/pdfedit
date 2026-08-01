@@ -24,8 +24,8 @@ function replaceUnsupportedColorFunctions(cssText: string): string {
 }
 
 /**
- * Converts image source URLs inside an element to base64 data URLs
- * to ensure html2canvas can capture them without CORS/taint errors on mobile/desktop.
+ * Converts image source URLs inside an element to base64 data URLs safely
+ * to ensure html2canvas captures them without CORS/taint errors on mobile & desktop.
  */
 async function preConvertImagesToDataUrls(container: HTMLElement): Promise<void> {
   const images = Array.from(container.querySelectorAll('img'));
@@ -36,6 +36,7 @@ async function preConvertImagesToDataUrls(container: HTMLElement): Promise<void>
 
     try {
       const response = await fetch(src, { mode: 'cors' });
+      if (!response.ok) continue;
       const blob = await response.blob();
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -48,13 +49,18 @@ async function preConvertImagesToDataUrls(container: HTMLElement): Promise<void>
       });
       img.setAttribute('src', dataUrl);
     } catch (err) {
-      console.warn('Failed to pre-convert image to data URL:', src, err);
+      console.warn('Image pre-conversion notice (using direct src fallback):', src, err);
     }
   }
 }
 
 export async function exportToPdf(elementId: string, filename: string): Promise<void> {
-  const element = document.getElementById(elementId);
+  // Find element by id
+  let element = document.getElementById(elementId);
+  if (!element) {
+    element = document.querySelector('.printable-area-wrapper #printable-contract') as HTMLElement;
+  }
+
   if (!element) {
     console.error(`Element with id "${elementId}" not found for PDF export.`);
     throw new Error('عنصر العقد غير موجود للطباعة');
@@ -63,19 +69,19 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
   const cleanFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
 
   try {
-    // Pre-convert images to Base64 data URLs
+    // Pre-convert images to Base64 data URLs if possible
     await preConvertImagesToDataUrls(element);
 
-    // Create a temporary clone with fixed A4 dimensions in body to guarantee 100% accurate rendering on Mobile & Desktop
+    // Create a clean off-screen clone with standard A4 dimensions for html2canvas
     const clone = element.cloneNode(true) as HTMLElement;
-    clone.style.position = 'fixed';
-    clone.style.left = '0';
-    clone.style.top = '0';
+    clone.style.position = 'absolute';
+    clone.style.left = '-9999px';
+    clone.style.top = '0px';
     clone.style.width = '794px';
     clone.style.height = '1123px';
     clone.style.maxWidth = '794px';
     clone.style.maxHeight = '1123px';
-    clone.style.zIndex = '-99999';
+    clone.style.zIndex = '9999';
     clone.style.opacity = '1';
     clone.style.transform = 'none';
     clone.style.boxSizing = 'border-box';
@@ -83,19 +89,19 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
     clone.style.padding = '0';
     clone.style.backgroundColor = '#ffffff';
 
-    // Remove positioning/highlight ring classes if present
+    // Remove interactive ring/highlight classes from clone
     clone.classList.remove('ring-2', 'ring-blue-500/50', 'ring-4', 'ring-amber-400', 'shadow-2xl');
 
     document.body.appendChild(clone);
 
-    // Wait 100ms for browser layout & fonts
-    await new Promise((r) => setTimeout(r, 100));
+    // Short layout settle wait time
+    await new Promise((r) => setTimeout(r, 150));
 
-    // Render element to canvas using html2canvas with explicit desktop window width
+    // Render element to canvas using html2canvas
     const canvas = await html2canvas(clone, {
-      scale: 2, // 300 DPI high resolution
+      scale: 2, // 300 DPI high clarity
       useCORS: true,
-      allowTaint: false,
+      allowTaint: true,
       logging: false,
       backgroundColor: '#ffffff',
       width: 794,
@@ -103,12 +109,10 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
       windowWidth: 1200,
       windowHeight: 1600,
       onclone: (clonedDoc) => {
-        // Sanitize head innerHTML if present
         if (clonedDoc.head) {
           clonedDoc.head.innerHTML = replaceUnsupportedColorFunctions(clonedDoc.head.innerHTML);
         }
 
-        // Sanitize all style elements
         const styleElements = clonedDoc.querySelectorAll('style');
         styleElements.forEach((styleEl) => {
           if (styleEl.textContent) {
@@ -118,7 +122,7 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
       },
     });
 
-    // Remove clone from DOM
+    // Cleanup offscreen clone element
     if (document.body.contains(clone)) {
       document.body.removeChild(clone);
     }
@@ -136,23 +140,28 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
     // Fit image exactly to A4 page dimensions (210mm x 297mm)
     pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
 
-    // Cross-platform mobile & desktop file download using Blob URL
-    const pdfBlob = pdf.output('blob');
-    const blobUrl = URL.createObjectURL(pdfBlob);
+    // Cross-platform PDF Save & Download (works on Mobile iOS/Android & Desktop)
+    try {
+      pdf.save(cleanFilename);
+    } catch (saveError) {
+      console.warn('pdf.save failed, falling back to blob URL download link', saveError);
+      const pdfBlob = pdf.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
 
-    const downloadLink = document.createElement('a');
-    downloadLink.href = blobUrl;
-    downloadLink.download = cleanFilename;
-    downloadLink.target = '_blank';
-    downloadLink.rel = 'noopener';
+      const downloadLink = document.createElement('a');
+      downloadLink.href = blobUrl;
+      downloadLink.download = cleanFilename;
+      downloadLink.target = '_blank';
+      downloadLink.rel = 'noopener';
 
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
 
-    setTimeout(() => {
-      URL.revokeObjectURL(blobUrl);
-    }, 15000);
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+      }, 15000);
+    }
   } catch (error) {
     console.error('Error generating PDF:', error);
     throw error;

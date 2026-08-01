@@ -17,6 +17,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
 }) => {
   const [activeDraggingField, setActiveDraggingField] = useState<keyof ContractFieldPositions | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const dragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // Merge default positions with customized positions
   const pos: ContractFieldPositions = {
@@ -25,9 +26,21 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
   };
 
   const handlePointerDown = (fieldKey: keyof ContractFieldPositions, e: React.PointerEvent) => {
-    if (!isPositioningMode || !onPositionChange) return;
+    if (!isPositioningMode || !onPositionChange || !svgRef.current) return;
     e.preventDefault();
     e.stopPropagation();
+
+    const svg = svgRef.current;
+    const rect = svg.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      const rawX = ((e.clientX - rect.left) / rect.width) * 794;
+      const rawY = ((e.clientY - rect.top) / rect.height) * 1123;
+      const currentPos = pos[fieldKey] || { x: 0, y: 0 };
+      dragOffsetRef.current = {
+        x: rawX - currentPos.x,
+        y: rawY - currentPos.y,
+      };
+    }
 
     const target = e.currentTarget as HTMLElement | SVGElement;
     try {
@@ -49,9 +62,12 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
     const rawX = ((e.clientX - rect.left) / rect.width) * 794;
     const rawY = ((e.clientY - rect.top) / rect.height) * 1123;
 
+    const targetX = rawX - dragOffsetRef.current.x;
+    const targetY = rawY - dragOffsetRef.current.y;
+
     // Clamp coordinates within A4 page bounds
-    const x = Math.max(10, Math.min(784, Math.round(rawX)));
-    const y = Math.max(10, Math.min(1113, Math.round(rawY)));
+    const x = Math.max(10, Math.min(784, Math.round(targetX)));
+    const y = Math.max(10, Math.min(1113, Math.round(targetY)));
 
     onPositionChange({
       ...pos,
@@ -148,19 +164,20 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
             fontWeight="900"
             style={{ fontWeight: 900, textRendering: 'geometricPrecision' }}
           >
-            {/* Helper renderer for draggable text elements with highlight */}
+            {/* Helper renderer for draggable text elements with transparent highlight */}
             {[
-              { key: 'contractNumber', val: contract.contractNumber || '', anchor: 'middle', dir: 'ltr', fontSize: '14' },
-              { key: 'startDate', val: contract.startDate || '', anchor: 'middle', dir: 'ltr', fontSize: '11.5' },
-              { key: 'startHijriDate', val: contract.startHijriDate || '', anchor: 'end', dir: 'rtl', fontSize: '13' },
-              { key: 'endDate', val: contract.endDate || '', anchor: 'middle', dir: 'ltr', fontSize: '11.5' },
-              { key: 'endHijriDate', val: contract.endHijriDate || '', anchor: 'end', dir: 'rtl', fontSize: '13' },
-              { key: 'secondPartyName', val: contract.secondPartyName || '', anchor: 'end', dir: 'rtl', fontSize: '14' },
-              { key: 'secondPartyAddress', val: contract.secondPartyAddress || '', anchor: 'end', dir: 'rtl', fontSize: '13.5' },
+              { key: 'contractNumber', val: contract.contractNumber || '', dir: 'ltr', fontSize: '14', width: 120 },
+              { key: 'startDate', val: contract.startDate || '', dir: 'ltr', fontSize: '11.5', width: 110 },
+              { key: 'startHijriDate', val: contract.startHijriDate || '', dir: 'rtl', fontSize: '13', width: 130 },
+              { key: 'endDate', val: contract.endDate || '', dir: 'ltr', fontSize: '11.5', width: 110 },
+              { key: 'endHijriDate', val: contract.endHijriDate || '', dir: 'rtl', fontSize: '13', width: 130 },
+              { key: 'secondPartyName', val: contract.secondPartyName || '', dir: 'rtl', fontSize: '14', width: 220 },
+              { key: 'secondPartyAddress', val: contract.secondPartyAddress || '', dir: 'rtl', fontSize: '13.5', width: 220 },
             ].map((item) => {
               const fieldKey = item.key as keyof ContractFieldPositions;
               const fieldPos = pos[fieldKey] || { x: 0, y: 0 };
               const isDragging = activeDraggingField === fieldKey;
+              const boxWidth = item.width || 140;
 
               return (
                 <g
@@ -173,33 +190,33 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
                   }}
                   className="select-none"
                 >
-                  {/* Highlight box behind text when active / positioning */}
+                  {/* Transparent Highlight Box with dotted/solid blue border */}
                   {isPositioningMode && (
                     <rect
-                      x={item.anchor === 'middle' ? fieldPos.x - 60 : fieldPos.x - 140}
-                      y={fieldPos.y - 14}
-                      width={item.anchor === 'middle' ? 120 : 150}
-                      height={20}
+                      x={fieldPos.x - boxWidth / 2}
+                      y={fieldPos.y - 15}
+                      width={boxWidth}
+                      height={22}
                       rx={4}
-                      fill={isDragging ? '#2563eb' : '#eff6ff'}
-                      stroke={isDragging ? '#1d4ed8' : '#3b82f6'}
-                      strokeWidth={isDragging ? 2 : 1}
+                      fill="transparent"
+                      stroke={isDragging ? '#2563eb' : '#3b82f6'}
+                      strokeWidth={isDragging ? 2 : 1.5}
                       strokeDasharray={isDragging ? 'none' : '3,3'}
-                      opacity={isDragging ? 0.9 : 0.6}
+                      opacity={isDragging ? 1 : 0.85}
                     />
                   )}
 
-                  {/* Text Content */}
+                  {/* Text Content - Always dark/black so background contract image is visible */}
                   <text
                     x={fieldPos.x}
                     y={fieldPos.y}
                     fontSize={item.fontSize}
                     fontWeight="900"
                     style={{ fontWeight: 900 }}
-                    textAnchor={item.anchor as any}
+                    textAnchor="middle"
                     direction={item.dir as any}
                     unicodeBidi={item.dir === 'rtl' ? 'embed' : 'normal'}
-                    fill={isDragging ? '#ffffff' : '#000000'}
+                    fill="#000000"
                   >
                     {item.val}
                   </text>
@@ -253,8 +270,8 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
             className={`flex items-center justify-center select-none transition-all ${
               isPositioningMode
                 ? activeDraggingField === 'locationQr'
-                  ? 'ring-4 ring-blue-600 bg-blue-100/90 rounded-lg shadow-2xl scale-110 z-50'
-                  : 'ring-2 ring-emerald-500/80 rounded bg-emerald-50/40 hover:bg-emerald-100/60'
+                  ? 'ring-2 ring-blue-600 bg-transparent rounded shadow-lg scale-105 z-50'
+                  : 'ring-1 ring-blue-400/80 ring-dashed rounded bg-transparent'
                 : 'bg-transparent'
             }`}
             title={isPositioningMode ? 'اضغط واسحب لتحريك كيو ار الخريطة' : undefined}
