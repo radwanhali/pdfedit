@@ -168,9 +168,9 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
             {[
               { key: 'contractNumber', val: contract.contractNumber || '', dir: 'ltr', fontSize: '14', width: 120 },
               { key: 'startDate', val: contract.startDate || '', dir: 'ltr', fontSize: '11.5', width: 110 },
-              { key: 'startHijriDate', val: contract.startHijriDate || '', dir: 'rtl', fontSize: '13', width: 130 },
+              { key: 'startHijriDate', val: contract.startHijriDate || '', dir: 'rtl', fontSize: '11.5', width: 120 },
               { key: 'endDate', val: contract.endDate || '', dir: 'ltr', fontSize: '11.5', width: 110 },
-              { key: 'endHijriDate', val: contract.endHijriDate || '', dir: 'rtl', fontSize: '13', width: 130 },
+              { key: 'endHijriDate', val: contract.endHijriDate || '', dir: 'rtl', fontSize: '11.5', width: 120 },
               { key: 'secondPartyName', val: contract.secondPartyName || '', dir: 'rtl', fontSize: '14', width: 220 },
               { key: 'secondPartyAddress', val: contract.secondPartyAddress || '', dir: 'rtl', fontSize: '13.5', width: 220 },
             ].map((item) => {
