@@ -10,6 +10,20 @@ export function printDocument() {
 }
 
 /**
+ * Replaces modern CSS color functions unsupported by html2canvas (oklch, oklab, color-mix, etc.)
+ */
+function replaceUnsupportedColorFunctions(cssText: string): string {
+  if (!cssText) return '';
+  return cssText
+    .replace(/color-mix\s*\((?:[^\(\)]|\([^\(\)]*\))*\)/gi, '#1e293b')
+    .replace(/light-dark\s*\((?:[^\(\)]|\([^\(\)]*\))*\)/gi, '#1e293b')
+    .replace(/oklch\s*\([\s\S]*?\)/gi, '#1e293b')
+    .replace(/oklab\s*\([\s\S]*?\)/gi, '#1e293b')
+    .replace(/lch\s*\([\s\S]*?\)/gi, '#1e293b')
+    .replace(/lab\s*\([\s\S]*?\)/gi, '#1e293b');
+}
+
+/**
  * Converts image source URLs inside an element to base64 data URLs
  * to ensure html2canvas can capture them without CORS/taint errors.
  */
@@ -60,14 +74,16 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
       logging: false,
       backgroundColor: '#ffffff',
       onclone: (clonedDoc) => {
-        // Fix for html2canvas unsupported 'oklch' color function in Tailwind CSS v4
+        // Sanitize head innerHTML if present
+        if (clonedDoc.head) {
+          clonedDoc.head.innerHTML = replaceUnsupportedColorFunctions(clonedDoc.head.innerHTML);
+        }
+
+        // Sanitize all style elements
         const styleElements = clonedDoc.querySelectorAll('style');
         styleElements.forEach((styleEl) => {
           if (styleEl.textContent) {
-            styleEl.textContent = styleEl.textContent.replace(
-              /oklch\([^)]+\)/gi,
-              '#1e293b'
-            );
+            styleEl.textContent = replaceUnsupportedColorFunctions(styleEl.textContent);
           }
         });
 
@@ -75,14 +91,20 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
         const allElements = clonedDoc.querySelectorAll('*');
         allElements.forEach((el) => {
           const styleAttr = el.getAttribute('style');
-          if (styleAttr && styleAttr.includes('oklch')) {
-            el.setAttribute('style', styleAttr.replace(/oklch\([^)]+\)/gi, '#1e293b'));
+          if (
+            styleAttr &&
+            (styleAttr.includes('oklch') ||
+              styleAttr.includes('color-mix') ||
+              styleAttr.includes('light-dark') ||
+              styleAttr.includes('oklab'))
+          ) {
+            el.setAttribute('style', replaceUnsupportedColorFunctions(styleAttr));
           }
         });
 
         const clonedElement = clonedDoc.getElementById(elementId);
         if (clonedElement) {
-          clonedElement.classList.remove('ring-2', 'ring-blue-500/50');
+          clonedElement.classList.remove('ring-2', 'ring-blue-500/50', 'ring-4', 'ring-amber-400');
         }
       },
     });
