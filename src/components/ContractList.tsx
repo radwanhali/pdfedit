@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ContractData } from '../types';
-import { Plus, Search, FileEdit, Trash2, Download, Upload, Clock, AlertCircle } from 'lucide-react';
+import { Plus, Search, FileEdit, Trash2, Download, Upload, Clock, AlertCircle, Eye } from 'lucide-react';
 
 interface ContractListProps {
   contracts: ContractData[];
   selectedContractId: string;
   onSelectContract: (id: string) => void;
   onEditContract?: (id: string) => void;
+  onPreviewContract?: (id: string) => void;
   onCreateNewContract: () => void;
   onDeleteContract: (id: string) => void;
   onImportContracts: (imported: ContractData[]) => void;
@@ -18,6 +19,7 @@ export const ContractList: React.FC<ContractListProps> = ({
   selectedContractId,
   onSelectContract,
   onEditContract,
+  onPreviewContract,
   onCreateNewContract,
   onDeleteContract,
   onImportContracts,
@@ -234,8 +236,24 @@ export const ContractList: React.FC<ContractListProps> = ({
                   </div>
                 </div>
 
-                {/* Actions: Edit & Delete */}
+                {/* Actions: Preview, Edit & Delete */}
                 <div className="flex items-center gap-1 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                  {onPreviewContract && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectContract(c.id);
+                        onPreviewContract(c.id);
+                      }}
+                      title="معاينة العقد بشكله النهائي"
+                      className="p-1.5 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors flex items-center gap-1 text-[11px] font-bold border border-emerald-200"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>معاينة</span>
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={(e) => {
