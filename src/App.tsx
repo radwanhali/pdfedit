@@ -90,7 +90,7 @@ export default function App() {
     setContracts((prev) => [newContract, ...prev]);
     setSelectedContractId(newContract.id);
     setIsSaved(true);
-    setActiveTab('data'); // Automatically switch to Merged Contract Data tab
+    setActiveTab('data');
     showToast(`تم إنشاء عقد جديد رقم #${nextNum} وفتح بيانات الإدخال`);
   };
 
@@ -187,9 +187,9 @@ export default function App() {
         onPositionsChange={handlePositionsChange}
       />
 
-      {/* Hidden Container for PDF Export & Browser Printing */}
-      <div className="fixed -left-[9999px] top-0 pointer-events-none opacity-0" aria-hidden="true">
-        <div id="printable-contract" className="w-[794px]">
+      {/* Dedicated Container for PDF Export & Browser Printing */}
+      <div className="printable-area-wrapper fixed -left-[9999px] top-0 pointer-events-none opacity-0 print:static print:left-0 print:top-0 print:opacity-100 print:pointer-events-auto" aria-hidden="true">
+        <div className="w-[794px]">
           <ContractDocument
             contract={activeContract}
             isPositioningMode={false}

@@ -29,7 +29,7 @@ function replaceUnsupportedColorFunctions(cssText: string): string {
  */
 async function preConvertImagesToDataUrls(container: HTMLElement): Promise<void> {
   const images = Array.from(container.querySelectorAll('img'));
-  
+
   for (const img of images) {
     const src = img.getAttribute('src');
     if (!src || src.startsWith('data:')) continue;
@@ -70,7 +70,7 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
     const canvas = await html2canvas(element, {
       scale: 2, // High resolution for crisp PDF text and QR code
       useCORS: true,
-      allowTaint: false, // Critical: Must be false so canvas.toDataURL() never fails
+      allowTaint: false,
       logging: false,
       backgroundColor: '#ffffff',
       onclone: (clonedDoc) => {
@@ -102,9 +102,18 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
           }
         });
 
+        // Force exact A4 pixel dimensions on cloned printable contract element
         const clonedElement = clonedDoc.getElementById(elementId);
         if (clonedElement) {
-          clonedElement.classList.remove('ring-2', 'ring-blue-500/50', 'ring-4', 'ring-amber-400');
+          clonedElement.classList.remove('ring-2', 'ring-blue-500/50', 'ring-4', 'ring-amber-400', 'shadow-2xl');
+          clonedElement.style.width = '794px';
+          clonedElement.style.height = '1123px';
+          clonedElement.style.maxWidth = '794px';
+          clonedElement.style.maxHeight = '1123px';
+          clonedElement.style.transform = 'none';
+          clonedElement.style.boxSizing = 'border-box';
+          clonedElement.style.margin = '0';
+          clonedElement.style.padding = '0';
         }
       },
     });

@@ -24,20 +24,19 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
     ...(contract.fieldPositions || {}),
   };
 
-  const handleMouseDown = (fieldKey: keyof ContractFieldPositions, e: React.MouseEvent) => {
+  const handleStartDrag = (fieldKey: keyof ContractFieldPositions, e: React.MouseEvent | React.TouchEvent) => {
     if (!isPositioningMode || !onPositionChange) return;
-    e.preventDefault();
     e.stopPropagation();
     setActiveDraggingField(fieldKey);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const updatePositionFromClientCoords = (clientX: number, clientY: number) => {
     if (!activeDraggingField || !isPositioningMode || !onPositionChange || !svgRef.current) return;
 
     const svg = svgRef.current;
     const rect = svg.getBoundingClientRect();
-    const x = Math.max(0, Math.min(794, Math.round(((e.clientX - rect.left) / rect.width) * 794)));
-    const y = Math.max(0, Math.min(1123, Math.round(((e.clientY - rect.top) / rect.height) * 1123)));
+    const x = Math.max(0, Math.min(794, Math.round(((clientX - rect.left) / rect.width) * 794)));
+    const y = Math.max(0, Math.min(1123, Math.round(((clientY - rect.top) / rect.height) * 1123)));
 
     const updated = {
       ...pos,
@@ -46,7 +45,17 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
     onPositionChange(updated);
   };
 
-  const handleMouseUp = () => {
+  const handleMouseMove = (e: React.MouseEvent) => {
+    updatePositionFromClientCoords(e.clientX, e.clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length > 0) {
+      updatePositionFromClientCoords(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  };
+
+  const handleEndDrag = () => {
     setActiveDraggingField(null);
   };
 
@@ -61,7 +70,9 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
     if (!isPositioningMode) return {};
 
     return {
-      onMouseDown: (e: React.MouseEvent) => handleMouseDown(fieldKey, e),
+      onMouseDown: (e: React.MouseEvent) => handleStartDrag(fieldKey, e),
+      onTouchStart: (e: React.TouchEvent) => handleStartDrag(fieldKey, e),
+      style: { touchAction: 'none' },
       className: `cursor-move select-none transition-opacity ${
         isSelected ? 'opacity-70 ring-2 ring-blue-500 ring-offset-1' : 'hover:opacity-80'
       }`,
@@ -76,7 +87,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           <div className="flex items-center gap-2">
             <Move className="w-4 h-4 text-amber-600 animate-pulse shrink-0" />
             <span className="font-bold">وضع تحديد ومواضع الحقول:</span>
-            <span>انقر واسحب أي حقل أو QR خريطة الموقع لتعديل موقعه بدقة فوق الورقة.</span>
+            <span>اضغط بالماوس أو الإصبع واسحب أي نصوص أو QR الخريطة لتغيير مكانه.</span>
           </div>
           <button
             type="button"
@@ -84,12 +95,12 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
             className="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 rounded text-xs font-semibold shadow-xs transition-colors shrink-0"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            إعادة للمواضع الأصلية
+            المواضع الأصلية
           </button>
         </div>
       )}
 
-      {/* Main Printable Document Sheet - Direct HTML/SVG Canvas without External Images */}
+      {/* Main Printable Document Sheet - Direct A4 Canvas */}
       <div
         id="printable-contract"
         dir="ltr"
@@ -98,7 +109,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
         }`}
         style={{ boxSizing: 'border-box' }}
       >
-        {/* Background Image Layer (Rendered only if backgroundImageUrl is specified) */}
+        {/* Background Image Layer */}
         {contract.backgroundImageUrl && (
           <img
             src={contract.backgroundImageUrl}
@@ -114,12 +125,15 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           viewBox="0 0 794 1123"
           dir="ltr"
           onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+          onMouseUp={handleEndDrag}
+          onMouseLeave={handleEndDrag}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleEndDrag}
+          onTouchCancel={handleEndDrag}
           className={`w-full h-full absolute inset-0 block ${
             isPositioningMode ? 'cursor-crosshair' : 'pointer-events-none'
           }`}
-          style={{ width: '100%', height: '100%' }}
+          style={{ width: '100%', height: '100%', touchAction: isPositioningMode ? 'none' : 'auto' }}
         >
           {/* Paper Canvas (Transparent if background image is present, white if not) */}
           <rect width="794" height="1123" fill={contract.backgroundImageUrl ? 'transparent' : '#ffffff'} />
@@ -161,7 +175,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </text>
             </g>
 
-            {/* Start Hijri Date */}
+            {/* Start Hijri Date - RTL alignment ending at X */}
             <g {...getDraggableProps('startHijriDate')}>
               <text
                 x={pos.startHijriDate.x}
@@ -169,7 +183,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
                 fontSize="13"
                 fontWeight="900"
                 style={{ fontWeight: 900 }}
-                textAnchor="middle"
+                textAnchor="end"
                 direction="rtl"
                 unicodeBidi="embed"
                 fill="#000000"
@@ -193,7 +207,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </text>
             </g>
 
-            {/* End Hijri Date */}
+            {/* End Hijri Date - RTL alignment ending at X */}
             <g {...getDraggableProps('endHijriDate')}>
               <text
                 x={pos.endHijriDate.x}
@@ -210,7 +224,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </text>
             </g>
 
-            {/* Second Party (Client Name) */}
+            {/* Second Party (Client Name) - RTL Alignment starting from right label expanding to left */}
             <g {...getDraggableProps('secondPartyName')}>
               <text
                 x={pos.secondPartyName.x}
@@ -227,7 +241,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </text>
             </g>
 
-            {/* Second Party Address */}
+            {/* Second Party Address - RTL Alignment starting from right label expanding to left */}
             <g {...getDraggableProps('secondPartyAddress')}>
               <text
                 x={pos.secondPartyAddress.x}
@@ -253,11 +267,13 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               position: 'absolute',
               left: `${(pos.locationQr.x / 794) * 100}%`,
               top: `${(pos.locationQr.y / 1123) * 100}%`,
-              width: '11.5%', // 91px / 794px - enlarged size
-              height: '8.1%', // 91px / 1123px - enlarged size
+              width: '11.5%',
+              height: '8.1%',
               zIndex: 20,
+              touchAction: isPositioningMode ? 'none' : 'auto',
             }}
-            onMouseDown={(e) => handleMouseDown('locationQr', e)}
+            onMouseDown={(e) => handleStartDrag('locationQr', e)}
+            onTouchStart={(e) => handleStartDrag('locationQr', e)}
             className={`flex items-center justify-center select-none bg-transparent ${
               isPositioningMode ? 'cursor-move ring-2 ring-emerald-500 rounded p-1 bg-emerald-50/50' : 'pointer-events-none'
             }`}
@@ -273,9 +289,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
             />
           </div>
         )}
-
       </div>
     </div>
   );
 };
-
