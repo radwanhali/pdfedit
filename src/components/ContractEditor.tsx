@@ -44,8 +44,6 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
   contract,
   onChange,
   onOpenPreviewModal,
-  isPositioningMode = false,
-  onTogglePositioningMode,
   contracts,
   selectedContractId,
   onSelectContract,
@@ -200,7 +198,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                   بيانات العقد المدمجة
                 </h3>
                 <p className="text-[11px] text-slate-500 mt-0.5">
-                  إدخال رقم العقد والتواريخ المزدوجة وبيانات العجل ورابط الخريطة
+                  إدخال رقم العقد والتواريخ المزدوجة وبيانات الطرف الثاني ورابط الخريطة
                 </p>
               </div>
 
@@ -237,7 +235,8 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                     value={contract.contractNumber}
                     onChange={(e) => updateField('contractNumber', e.target.value)}
                     placeholder="مثال: 1001"
-                    className="w-full p-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full p-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none text-right font-medium"
+                    dir="rtl"
                   />
                 </div>
 
@@ -252,21 +251,23 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                         type="date"
                         value={contract.startDate}
                         onChange={(e) => handleStartDateChange(e.target.value)}
-                        className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                        className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none text-right font-medium"
+                        dir="rtl"
                       />
                     </div>
 
                     <div>
                       <label className="block text-xs font-medium text-slate-600 mb-1">
-                        تاريخ بداية العقد (هجري - أرقام)
+                        تاريخ بداية العقد (هجري - اليوم/الشهر/السنة)
                       </label>
                       <div className="flex gap-2">
                         <input
                           type="text"
                           value={contract.startHijriDate}
                           onChange={(e) => updateField('startHijriDate', e.target.value)}
-                          placeholder="مثال: 1448/02/17"
-                          className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                          placeholder="17/02/1448"
+                          className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none text-right font-mono"
+                          dir="rtl"
                         />
                         <button
                           type="button"
@@ -290,21 +291,23 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                         type="date"
                         value={contract.endDate}
                         onChange={(e) => handleEndDateChange(e.target.value)}
-                        className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                        className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none text-right font-medium"
+                        dir="rtl"
                       />
                     </div>
 
                     <div>
                       <label className="block text-xs font-medium text-slate-600 mb-1">
-                        تاريخ نهاية العقد (هجري - أرقام)
+                        تاريخ نهاية العقد (هجري - اليوم/الشهر/السنة)
                       </label>
                       <div className="flex gap-2">
                         <input
                           type="text"
                           value={contract.endHijriDate}
                           onChange={(e) => updateField('endHijriDate', e.target.value)}
-                          placeholder="مثال: 1448/03/17"
-                          className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                          placeholder="17/03/1448"
+                          className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none text-right font-mono"
+                          dir="rtl"
                         />
                         <button
                           type="button"
@@ -338,7 +341,8 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                     value={contract.secondPartyName}
                     onChange={(e) => updateField('secondPartyName', e.target.value)}
                     placeholder="مثال: شركة المقاولات الحديثة المحدودة"
-                    className="w-full p-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full p-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none text-right font-medium"
+                    dir="rtl"
                   />
                 </div>
 
@@ -351,7 +355,8 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                     value={contract.secondPartyAddress}
                     onChange={(e) => updateField('secondPartyAddress', e.target.value)}
                     placeholder="مثال: الرياض - حي الملز - شارع الستين"
-                    className="w-full p-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full p-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none text-right font-medium"
+                    dir="rtl"
                   />
                 </div>
               </div>
@@ -386,7 +391,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                     value={contract.googleMapsUrl}
                     onChange={(e) => updateField('googleMapsUrl', e.target.value)}
                     placeholder="https://maps.google.com/?q=24.7136,46.6753"
-                    className="w-full p-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full p-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none text-left font-sans"
                     dir="ltr"
                   />
                   {contract.googleMapsUrl && (
@@ -493,7 +498,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                   قسم ضبط موضع الحقول على صورة العقد
                 </h3>
                 <p className="text-[11px] text-slate-500 mt-0.5">
-                  الضبط الدقيق لمواقع النصوص والإحداثيات بالمليمترات أو السحب المباشر في المعاينة
+                  الضبط الدقيق لمواقع النصوص والكيو ار بالتحريك المباشر في المعاينة أو تعديل أبعاد الموضع يدوياً
                 </p>
               </div>
 
@@ -504,7 +509,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                   className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-xs"
                 >
                   <Move className="w-4 h-4" />
-                  <span>فتح المعاينة المنبثقة والسحب</span>
+                  <span>فتح المعاينة والتحريك المباشر</span>
                 </button>
 
                 <button
@@ -521,11 +526,11 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
             {/* Guidance banner */}
             <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 leading-relaxed flex items-center justify-between gap-3">
               <span>
-                يمكنك الضغط على زر <strong>"فتح المعاينة المنبثقة"</strong> للتحريك السريع بالماوس، أو تعديل إحداثيات X و Y يدوياً أدناه:
+                يمكنك الضغط على زر <strong>"فتح المعاينة والتحريك المباشر"</strong> للسحب السريع بالماوس أو على الجوال، أو تعديل إحداثيات الموضع (يمين - يسار / أعلى - أسفل) يدوياً أدناه:
               </span>
             </div>
 
-            {/* Coordinates grid */}
+            {/* Coordinates grid with Arabic Descriptive Labels */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               {[
                 { key: 'contractNumber', label: 'رقم العقد' },
@@ -540,11 +545,11 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                 const k = field.key as keyof ContractFieldPositions;
                 const pos = positions[k] || { x: 0, y: 0 };
                 return (
-                  <div key={k} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-2 shadow-2xs">
+                  <div key={k} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
                     <span className="font-bold text-slate-800 shrink-0">{field.label}:</span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1">
-                        <span className="text-[10px] text-slate-400 font-mono">X:</span>
+                        <span className="text-[10px] text-slate-500 font-semibold">يمين - يسار:</span>
                         <input
                           type="number"
                           value={pos.x}
@@ -553,7 +558,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                         />
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="text-[10px] text-slate-400 font-mono">Y:</span>
+                        <span className="text-[10px] text-slate-500 font-semibold">أعلى - أسفل:</span>
                         <input
                           type="number"
                           value={pos.y}

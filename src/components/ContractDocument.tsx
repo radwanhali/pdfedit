@@ -24,39 +24,47 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
     ...(contract.fieldPositions || {}),
   };
 
-  const handleStartDrag = (fieldKey: keyof ContractFieldPositions, e: React.MouseEvent | React.TouchEvent) => {
+  const handlePointerDown = (fieldKey: keyof ContractFieldPositions, e: React.PointerEvent) => {
     if (!isPositioningMode || !onPositionChange) return;
+    e.preventDefault();
     e.stopPropagation();
+
+    const target = e.currentTarget as HTMLElement | SVGElement;
+    try {
+      target.setPointerCapture(e.pointerId);
+    } catch (err) {
+      console.warn('Pointer capture fallback', err);
+    }
     setActiveDraggingField(fieldKey);
   };
 
-  const updatePositionFromClientCoords = (clientX: number, clientY: number) => {
-    if (!activeDraggingField || !isPositioningMode || !onPositionChange || !svgRef.current) return;
+  const handlePointerMove = (fieldKey: keyof ContractFieldPositions, e: React.PointerEvent) => {
+    if (activeDraggingField !== fieldKey || !isPositioningMode || !onPositionChange || !svgRef.current) return;
+    e.preventDefault();
 
     const svg = svgRef.current;
     const rect = svg.getBoundingClientRect();
-    const x = Math.max(0, Math.min(794, Math.round(((clientX - rect.left) / rect.width) * 794)));
-    const y = Math.max(0, Math.min(1123, Math.round(((clientY - rect.top) / rect.height) * 1123)));
+    if (rect.width === 0 || rect.height === 0) return;
 
-    const updated = {
+    const x = Math.max(0, Math.min(794, Math.round(((e.clientX - rect.left) / rect.width) * 794)));
+    const y = Math.max(0, Math.min(1123, Math.round(((e.clientY - rect.top) / rect.height) * 1123)));
+
+    onPositionChange({
       ...pos,
-      [activeDraggingField]: { x, y },
-    };
-    onPositionChange(updated);
+      [fieldKey]: { x, y },
+    });
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    updatePositionFromClientCoords(e.clientX, e.clientY);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length > 0) {
-      updatePositionFromClientCoords(e.touches[0].clientX, e.touches[0].clientY);
+  const handlePointerUp = (fieldKey: keyof ContractFieldPositions, e: React.PointerEvent) => {
+    if (activeDraggingField === fieldKey) {
+      const target = e.currentTarget as HTMLElement | SVGElement;
+      try {
+        target.releasePointerCapture(e.pointerId);
+      } catch (err) {
+        // ignore
+      }
+      setActiveDraggingField(null);
     }
-  };
-
-  const handleEndDrag = () => {
-    setActiveDraggingField(null);
   };
 
   const handleResetPositions = () => {
@@ -70,10 +78,12 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
     if (!isPositioningMode) return {};
 
     return {
-      onMouseDown: (e: React.MouseEvent) => handleStartDrag(fieldKey, e),
-      onTouchStart: (e: React.TouchEvent) => handleStartDrag(fieldKey, e),
-      style: { touchAction: 'none' },
-      className: `cursor-move select-none transition-opacity ${
+      onPointerDown: (e: React.PointerEvent) => handlePointerDown(fieldKey, e),
+      onPointerMove: (e: React.PointerEvent) => handlePointerMove(fieldKey, e),
+      onPointerUp: (e: React.PointerEvent) => handlePointerUp(fieldKey, e),
+      onPointerCancel: (e: React.PointerEvent) => handlePointerUp(fieldKey, e),
+      style: { touchAction: 'none', cursor: 'grab' },
+      className: `select-none transition-opacity ${
         isSelected ? 'opacity-70 ring-2 ring-blue-500 ring-offset-1' : 'hover:opacity-80'
       }`,
     };
@@ -86,8 +96,8 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
         <div className="mb-2 p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-between text-xs text-amber-800 dark:text-amber-300">
           <div className="flex items-center gap-2">
             <Move className="w-4 h-4 text-amber-600 animate-pulse shrink-0" />
-            <span className="font-bold">وضع تحديد ومواضع الحقول:</span>
-            <span>اضغط بالماوس أو الإصبع واسحب أي نصوص أو QR الخريطة لتغيير مكانه.</span>
+            <span className="font-bold">وضع تحريك الحقول باللمس/الماوس:</span>
+            <span>اضغط مع الاستمرار واسحب أي نص أو كيو ار الخريطة لمكانه المباشر.</span>
           </div>
           <button
             type="button"
@@ -124,12 +134,6 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 794 1123"
           dir="ltr"
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleEndDrag}
-          onMouseLeave={handleEndDrag}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleEndDrag}
-          onTouchCancel={handleEndDrag}
           className={`w-full h-full absolute inset-0 block ${
             isPositioningMode ? 'cursor-crosshair' : 'pointer-events-none'
           }`}
@@ -175,7 +179,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </text>
             </g>
 
-            {/* Start Hijri Date - RTL alignment ending at X */}
+            {/* Start Hijri Date */}
             <g {...getDraggableProps('startHijriDate')}>
               <text
                 x={pos.startHijriDate.x}
@@ -207,7 +211,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </text>
             </g>
 
-            {/* End Hijri Date - RTL alignment ending at X */}
+            {/* End Hijri Date */}
             <g {...getDraggableProps('endHijriDate')}>
               <text
                 x={pos.endHijriDate.x}
@@ -224,7 +228,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </text>
             </g>
 
-            {/* Second Party (Client Name) - RTL Alignment starting from right label expanding to left */}
+            {/* Second Party (Client Name) */}
             <g {...getDraggableProps('secondPartyName')}>
               <text
                 x={pos.secondPartyName.x}
@@ -241,7 +245,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </text>
             </g>
 
-            {/* Second Party Address - RTL Alignment starting from right label expanding to left */}
+            {/* Second Party Address */}
             <g {...getDraggableProps('secondPartyAddress')}>
               <text
                 x={pos.secondPartyAddress.x}
@@ -272,12 +276,13 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               zIndex: 20,
               touchAction: isPositioningMode ? 'none' : 'auto',
             }}
-            onMouseDown={(e) => handleStartDrag('locationQr', e)}
-            onTouchStart={(e) => handleStartDrag('locationQr', e)}
+            {...(isPositioningMode ? getDraggableProps('locationQr') : {})}
             className={`flex items-center justify-center select-none bg-transparent ${
-              isPositioningMode ? 'cursor-move ring-2 ring-emerald-500 rounded p-1 bg-emerald-50/50' : 'pointer-events-none'
+              isPositioningMode
+                ? 'cursor-grab ring-2 ring-emerald-500 rounded p-1 bg-emerald-50/50 hover:bg-emerald-100/60'
+                : 'pointer-events-none'
             }`}
-            title={isPositioningMode ? 'اسحب لتحريك كيو ار الخريطة' : undefined}
+            title={isPositioningMode ? 'اضغط واسحب لتحريك كيو ار الخريطة' : undefined}
           >
             <QRCodeSVG
               value={contract.googleMapsUrl}
@@ -285,7 +290,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               level="M"
               fgColor="#000000"
               bgColor="transparent"
-              className="w-full h-full"
+              className="w-full h-full pointer-events-none"
             />
           </div>
         )}
