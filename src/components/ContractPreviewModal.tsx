@@ -113,20 +113,20 @@ export const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
         {isPositioningMode && (
           <div className="bg-amber-500 text-white text-xs px-3 py-1.5 flex items-center justify-between font-semibold shrink-0">
             <div className="flex items-center gap-2">
-              <Move className="w-3.5 h-3.5 animate-spin shrink-0" />
-              <span>وضع تحريك الحقول مفعل! اضغط واسحب أي نص أو QR الخريطة لمكانه المناسب.</span>
+              <Move className="w-3.5 h-3.5 animate-bounce shrink-0" />
+              <span>وضع تحريك الحقول مفعل: اضغط مع الاستمرار واسحب أي نص أو كيو ار الخريطة بيدك إلى مكانه.</span>
             </div>
             <button
               onClick={onTogglePositioningMode}
-              className="bg-amber-700 hover:bg-amber-800 text-white text-[10px] px-2 py-0.5 rounded"
+              className="bg-amber-700 hover:bg-amber-800 text-white text-[10px] font-bold px-2.5 py-1 rounded shadow-xs"
             >
-              تم
+              حفظ وإغلاق التحريك
             </button>
           </div>
         )}
 
         {/* Modal Body: Responsive Scrollable A4 Sheet Canvas */}
-        <div className="p-2 sm:p-6 bg-slate-200/80 overflow-auto flex-1 flex justify-center items-start min-h-0 w-full">
+        <div className="p-2 sm:p-6 bg-slate-200/80 overflow-auto flex-1 flex justify-center items-start min-h-0 w-full touch-pan-x touch-pan-y">
           <div
             className="transition-transform duration-100 ease-out origin-top w-full max-w-[794px] bg-white shadow-2xl rounded-sm overflow-hidden"
             style={{

@@ -25,7 +25,7 @@ function replaceUnsupportedColorFunctions(cssText: string): string {
 
 /**
  * Converts image source URLs inside an element to base64 data URLs
- * to ensure html2canvas can capture them without CORS/taint errors.
+ * to ensure html2canvas can capture them without CORS/taint errors on mobile/desktop.
  */
 async function preConvertImagesToDataUrls(container: HTMLElement): Promise<void> {
   const images = Array.from(container.querySelectorAll('img'));
@@ -35,7 +35,7 @@ async function preConvertImagesToDataUrls(container: HTMLElement): Promise<void>
     if (!src || src.startsWith('data:')) continue;
 
     try {
-      const response = await fetch(src);
+      const response = await fetch(src, { mode: 'cors' });
       const blob = await response.blob();
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -63,16 +63,45 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
   const cleanFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
 
   try {
-    // Pre-convert all images to Base64 data URLs before capturing to prevent canvas taint
+    // Pre-convert images to Base64 data URLs
     await preConvertImagesToDataUrls(element);
 
-    // Render element to canvas using html2canvas
-    const canvas = await html2canvas(element, {
-      scale: 2, // High resolution for crisp PDF text and QR code
+    // Create a temporary clone with fixed A4 dimensions in body to guarantee 100% accurate rendering on Mobile & Desktop
+    const clone = element.cloneNode(true) as HTMLElement;
+    clone.style.position = 'fixed';
+    clone.style.left = '0';
+    clone.style.top = '0';
+    clone.style.width = '794px';
+    clone.style.height = '1123px';
+    clone.style.maxWidth = '794px';
+    clone.style.maxHeight = '1123px';
+    clone.style.zIndex = '-99999';
+    clone.style.opacity = '1';
+    clone.style.transform = 'none';
+    clone.style.boxSizing = 'border-box';
+    clone.style.margin = '0';
+    clone.style.padding = '0';
+    clone.style.backgroundColor = '#ffffff';
+
+    // Remove positioning/highlight ring classes if present
+    clone.classList.remove('ring-2', 'ring-blue-500/50', 'ring-4', 'ring-amber-400', 'shadow-2xl');
+
+    document.body.appendChild(clone);
+
+    // Wait 100ms for browser layout & fonts
+    await new Promise((r) => setTimeout(r, 100));
+
+    // Render element to canvas using html2canvas with explicit desktop window width
+    const canvas = await html2canvas(clone, {
+      scale: 2, // 300 DPI high resolution
       useCORS: true,
       allowTaint: false,
       logging: false,
       backgroundColor: '#ffffff',
+      width: 794,
+      height: 1123,
+      windowWidth: 1200,
+      windowHeight: 1600,
       onclone: (clonedDoc) => {
         // Sanitize head innerHTML if present
         if (clonedDoc.head) {
@@ -86,37 +115,13 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
             styleEl.textContent = replaceUnsupportedColorFunctions(styleEl.textContent);
           }
         });
-
-        // Clean inline styles on elements in cloned document
-        const allElements = clonedDoc.querySelectorAll('*');
-        allElements.forEach((el) => {
-          const styleAttr = el.getAttribute('style');
-          if (
-            styleAttr &&
-            (styleAttr.includes('oklch') ||
-              styleAttr.includes('color-mix') ||
-              styleAttr.includes('light-dark') ||
-              styleAttr.includes('oklab'))
-          ) {
-            el.setAttribute('style', replaceUnsupportedColorFunctions(styleAttr));
-          }
-        });
-
-        // Force exact A4 pixel dimensions on cloned printable contract element
-        const clonedElement = clonedDoc.getElementById(elementId);
-        if (clonedElement) {
-          clonedElement.classList.remove('ring-2', 'ring-blue-500/50', 'ring-4', 'ring-amber-400', 'shadow-2xl');
-          clonedElement.style.width = '794px';
-          clonedElement.style.height = '1123px';
-          clonedElement.style.maxWidth = '794px';
-          clonedElement.style.maxHeight = '1123px';
-          clonedElement.style.transform = 'none';
-          clonedElement.style.boxSizing = 'border-box';
-          clonedElement.style.margin = '0';
-          clonedElement.style.padding = '0';
-        }
       },
     });
+
+    // Remove clone from DOM
+    if (document.body.contains(clone)) {
+      document.body.removeChild(clone);
+    }
 
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
 
@@ -128,11 +133,26 @@ export async function exportToPdf(elementId: string, filename: string): Promise<
       compress: true,
     });
 
-    // Fit image exactly to A4 page dimensions
+    // Fit image exactly to A4 page dimensions (210mm x 297mm)
     pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
 
-    // Direct browser file download
-    pdf.save(cleanFilename);
+    // Cross-platform mobile & desktop file download using Blob URL
+    const pdfBlob = pdf.output('blob');
+    const blobUrl = URL.createObjectURL(pdfBlob);
+
+    const downloadLink = document.createElement('a');
+    downloadLink.href = blobUrl;
+    downloadLink.download = cleanFilename;
+    downloadLink.target = '_blank';
+    downloadLink.rel = 'noopener';
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+    setTimeout(() => {
+      URL.revokeObjectURL(blobUrl);
+    }, 15000);
   } catch (error) {
     console.error('Error generating PDF:', error);
     throw error;

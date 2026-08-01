@@ -135,46 +135,46 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('data')}
-          className={`flex-1 min-w-[140px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+          className={`flex-1 min-w-[120px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
             activeTab === 'data'
               ? 'bg-white text-blue-700 shadow-xs border border-slate-200/80 ring-1 ring-blue-500/20'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
           }`}
         >
           <FileText className="w-4 h-4 text-blue-600 shrink-0" />
-          <span>قسم بيانات العقد المدمجة</span>
+          <span>بيانات العقد</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('background')}
-          className={`flex-1 min-w-[140px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+          className={`flex-1 min-w-[120px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
             activeTab === 'background'
               ? 'bg-white text-purple-700 shadow-xs border border-slate-200/80 ring-1 ring-purple-500/20'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
           }`}
         >
           <Image className="w-4 h-4 text-purple-600 shrink-0" />
-          <span>قسم خلفية العقد</span>
+          <span>خلفية العقد</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('positions')}
-          className={`flex-1 min-w-[140px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+          className={`flex-1 min-w-[120px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
             activeTab === 'positions'
               ? 'bg-white text-amber-800 shadow-xs border border-slate-200/80 ring-1 ring-amber-500/20'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
           }`}
         >
           <Sliders className="w-4 h-4 text-amber-600 shrink-0" />
-          <span>ضبط مواضع الحقول</span>
+          <span>مواضع الحقول</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('contracts')}
-          className={`flex-1 min-w-[140px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+          className={`flex-1 min-w-[120px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
             activeTab === 'contracts'
               ? 'bg-white text-emerald-800 shadow-xs border border-slate-200/80 ring-1 ring-emerald-500/20'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
@@ -187,7 +187,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
 
       {/* Tab Content Container */}
       <div className="p-4 sm:p-6 space-y-6 flex-1">
-        {/* TAB 1: قسم بيانات العقد المدمجة */}
+        {/* TAB 1: بيانات العقد */}
         {activeTab === 'data' && (
           <div className="space-y-6 animate-in fade-in duration-150">
             {/* Header Badge */}
@@ -195,7 +195,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
               <div>
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <FileText className="w-4 h-4 text-blue-600" />
-                  بيانات العقد المدمجة
+                  بيانات العقد
                 </h3>
                 <p className="text-[11px] text-slate-500 mt-0.5">
                   إدخال رقم العقد والتواريخ المزدوجة وبيانات الطرف الثاني ورابط الخريطة
@@ -410,14 +410,14 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
           </div>
         )}
 
-        {/* TAB 2: قسم خلفية العقد */}
+        {/* TAB 2: خلفية العقد */}
         {activeTab === 'background' && (
           <div className="space-y-6 animate-in fade-in duration-150">
             <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <Image className="w-4 h-4 text-purple-600" />
-                  قسم خلفية العقد (صورة أو نموذج العقد المطبوع)
+                  خلفية العقد
                 </h3>
                 <p className="text-[11px] text-slate-500 mt-0.5">
                   يمكنك رفع صورة الورقة المتروسة أو استخدام القالب الافتراضي الجاهز
@@ -488,14 +488,14 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
           </div>
         )}
 
-        {/* TAB 3: قسم ضبط موضع الحقول */}
+        {/* TAB 3: مواضع الحقول */}
         {activeTab === 'positions' && (
           <div className="space-y-6 animate-in fade-in duration-150">
             <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <Sliders className="w-4 h-4 text-amber-600" />
-                  قسم ضبط موضع الحقول على صورة العقد
+                  مواضع الحقول
                 </h3>
                 <p className="text-[11px] text-slate-500 mt-0.5">
                   الضبط الدقيق لمواقع النصوص والكيو ار بالتحريك المباشر في المعاينة أو تعديل أبعاد الموضع يدوياً

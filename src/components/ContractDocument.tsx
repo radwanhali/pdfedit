@@ -33,7 +33,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
     try {
       target.setPointerCapture(e.pointerId);
     } catch (err) {
-      console.warn('Pointer capture fallback', err);
+      console.warn('Pointer capture error', err);
     }
     setActiveDraggingField(fieldKey);
   };
@@ -46,8 +46,12 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
     const rect = svg.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) return;
 
-    const x = Math.max(0, Math.min(794, Math.round(((e.clientX - rect.left) / rect.width) * 794)));
-    const y = Math.max(0, Math.min(1123, Math.round(((e.clientY - rect.top) / rect.height) * 1123)));
+    const rawX = ((e.clientX - rect.left) / rect.width) * 794;
+    const rawY = ((e.clientY - rect.top) / rect.height) * 1123;
+
+    // Clamp coordinates within A4 page bounds
+    const x = Math.max(10, Math.min(784, Math.round(rawX)));
+    const y = Math.max(10, Math.min(1113, Math.round(rawY)));
 
     onPositionChange({
       ...pos,
@@ -73,8 +77,8 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
     }
   };
 
-  const getDraggableProps = (fieldKey: keyof ContractFieldPositions) => {
-    const isSelected = activeDraggingField === fieldKey;
+  // Safe pointer listeners generator for draggable items
+  const getPointerEvents = (fieldKey: keyof ContractFieldPositions) => {
     if (!isPositioningMode) return {};
 
     return {
@@ -82,22 +86,18 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
       onPointerMove: (e: React.PointerEvent) => handlePointerMove(fieldKey, e),
       onPointerUp: (e: React.PointerEvent) => handlePointerUp(fieldKey, e),
       onPointerCancel: (e: React.PointerEvent) => handlePointerUp(fieldKey, e),
-      style: { touchAction: 'none', cursor: 'grab' },
-      className: `select-none transition-opacity ${
-        isSelected ? 'opacity-70 ring-2 ring-blue-500 ring-offset-1' : 'hover:opacity-80'
-      }`,
     };
   };
 
   return (
     <div className="relative group/doc w-full max-w-[794px] mx-auto">
-      {/* Position Adjustment Toolbar Notification */}
+      {/* Position Adjustment Toolbar Banner */}
       {isPositioningMode && (
         <div className="mb-2 p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-between text-xs text-amber-800 dark:text-amber-300">
           <div className="flex items-center gap-2">
             <Move className="w-4 h-4 text-amber-600 animate-pulse shrink-0" />
             <span className="font-bold">وضع تحريك الحقول باللمس/الماوس:</span>
-            <span>اضغط مع الاستمرار واسحب أي نص أو كيو ار الخريطة لمكانه المباشر.</span>
+            <span>اضغط واسحب أي نص أو كيو ار الخريطة مباشرة لوضعه في المكاني المطلوب.</span>
           </div>
           <button
             type="button"
@@ -115,7 +115,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
         id="printable-contract"
         dir="ltr"
         className={`bg-white text-slate-900 mx-auto font-sans relative shadow-2xl print:shadow-none print:m-0 print:p-0 print:w-[210mm] print:h-[297mm] print:max-w-none overflow-hidden select-none w-full max-w-[794px] aspect-[794/1123] ${
-          isPositioningMode ? 'ring-2 ring-blue-500/50' : ''
+          isPositioningMode ? 'ring-2 ring-blue-500/50 cursor-crosshair' : ''
         }`}
         style={{ boxSizing: 'border-box' }}
       >
@@ -128,7 +128,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           />
         )}
 
-        {/* Dynamic Text Fields and Drag SVG Overlay */}
+        {/* Dynamic Text Fields Overlay SVG */}
         <svg
           ref={svgRef}
           xmlns="http://www.w3.org/2000/svg"
@@ -137,150 +137,125 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           className={`w-full h-full absolute inset-0 block ${
             isPositioningMode ? 'cursor-crosshair' : 'pointer-events-none'
           }`}
-          style={{ width: '100%', height: '100%', touchAction: isPositioningMode ? 'none' : 'auto' }}
+          style={{ width: '100%', height: '100%' }}
         >
-          {/* Paper Canvas (Transparent if background image is present, white if not) */}
+          {/* Paper Canvas */}
           <rect width="794" height="1123" fill={contract.backgroundImageUrl ? 'transparent' : '#ffffff'} />
 
-          {/* Dynamic Contract Preamble Text Fields */}
+          {/* Text Elements */}
           <g
             fontFamily="'Traditional Arabic', 'Amiri', 'Segoe UI', 'Sakkal Majalla', serif, sans-serif"
-            fill="#000000"
             fontWeight="900"
             style={{ fontWeight: 900, textRendering: 'geometricPrecision' }}
           >
-            {/* Contract Number */}
-            <g {...getDraggableProps('contractNumber')}>
-              <text
-                x={pos.contractNumber.x}
-                y={pos.contractNumber.y}
-                fontSize="14"
-                fontWeight="900"
-                style={{ fontWeight: 900 }}
-                textAnchor="middle"
-                fill="#000000"
-              >
-                {contract.contractNumber || ''}
-              </text>
-            </g>
+            {/* Helper renderer for draggable text elements with highlight */}
+            {[
+              { key: 'contractNumber', val: contract.contractNumber || '', anchor: 'middle', dir: 'ltr', fontSize: '14' },
+              { key: 'startDate', val: contract.startDate || '', anchor: 'middle', dir: 'ltr', fontSize: '11.5' },
+              { key: 'startHijriDate', val: contract.startHijriDate || '', anchor: 'end', dir: 'rtl', fontSize: '13' },
+              { key: 'endDate', val: contract.endDate || '', anchor: 'middle', dir: 'ltr', fontSize: '11.5' },
+              { key: 'endHijriDate', val: contract.endHijriDate || '', anchor: 'end', dir: 'rtl', fontSize: '13' },
+              { key: 'secondPartyName', val: contract.secondPartyName || '', anchor: 'end', dir: 'rtl', fontSize: '14' },
+              { key: 'secondPartyAddress', val: contract.secondPartyAddress || '', anchor: 'end', dir: 'rtl', fontSize: '13.5' },
+            ].map((item) => {
+              const fieldKey = item.key as keyof ContractFieldPositions;
+              const fieldPos = pos[fieldKey] || { x: 0, y: 0 };
+              const isDragging = activeDraggingField === fieldKey;
 
-            {/* Start Gregorian Date */}
-            <g {...getDraggableProps('startDate')}>
-              <text
-                x={pos.startDate.x}
-                y={pos.startDate.y}
-                fontSize="11.5"
-                fontWeight="900"
-                style={{ fontWeight: 900 }}
-                textAnchor="middle"
-                fill="#000000"
-              >
-                {contract.startDate || ''}
-              </text>
-            </g>
+              return (
+                <g
+                  key={fieldKey}
+                  {...getPointerEvents(fieldKey)}
+                  style={{
+                    cursor: isPositioningMode ? (isDragging ? 'grabbing' : 'crosshair') : 'default',
+                    touchAction: isPositioningMode ? 'none' : 'auto',
+                    pointerEvents: isPositioningMode ? 'all' : 'none',
+                  }}
+                  className="select-none"
+                >
+                  {/* Highlight box behind text when active / positioning */}
+                  {isPositioningMode && (
+                    <rect
+                      x={item.anchor === 'middle' ? fieldPos.x - 60 : fieldPos.x - 140}
+                      y={fieldPos.y - 14}
+                      width={item.anchor === 'middle' ? 120 : 150}
+                      height={20}
+                      rx={4}
+                      fill={isDragging ? '#2563eb' : '#eff6ff'}
+                      stroke={isDragging ? '#1d4ed8' : '#3b82f6'}
+                      strokeWidth={isDragging ? 2 : 1}
+                      strokeDasharray={isDragging ? 'none' : '3,3'}
+                      opacity={isDragging ? 0.9 : 0.6}
+                    />
+                  )}
 
-            {/* Start Hijri Date */}
-            <g {...getDraggableProps('startHijriDate')}>
-              <text
-                x={pos.startHijriDate.x}
-                y={pos.startHijriDate.y}
-                fontSize="13"
-                fontWeight="900"
-                style={{ fontWeight: 900 }}
-                textAnchor="end"
-                direction="rtl"
-                unicodeBidi="embed"
-                fill="#000000"
-              >
-                {contract.startHijriDate || ''}
-              </text>
-            </g>
+                  {/* Text Content */}
+                  <text
+                    x={fieldPos.x}
+                    y={fieldPos.y}
+                    fontSize={item.fontSize}
+                    fontWeight="900"
+                    style={{ fontWeight: 900 }}
+                    textAnchor={item.anchor as any}
+                    direction={item.dir as any}
+                    unicodeBidi={item.dir === 'rtl' ? 'embed' : 'normal'}
+                    fill={isDragging ? '#ffffff' : '#000000'}
+                  >
+                    {item.val}
+                  </text>
 
-            {/* End Gregorian Date */}
-            <g {...getDraggableProps('endDate')}>
-              <text
-                x={pos.endDate.x}
-                y={pos.endDate.y}
-                fontSize="11.5"
-                fontWeight="900"
-                style={{ fontWeight: 900 }}
-                textAnchor="middle"
-                fill="#000000"
-              >
-                {contract.endDate || ''}
-              </text>
-            </g>
-
-            {/* End Hijri Date */}
-            <g {...getDraggableProps('endHijriDate')}>
-              <text
-                x={pos.endHijriDate.x}
-                y={pos.endHijriDate.y}
-                fontSize="13"
-                fontWeight="900"
-                style={{ fontWeight: 900 }}
-                textAnchor="end"
-                direction="rtl"
-                unicodeBidi="embed"
-                fill="#000000"
-              >
-                {contract.endHijriDate || ''}
-              </text>
-            </g>
-
-            {/* Second Party (Client Name) */}
-            <g {...getDraggableProps('secondPartyName')}>
-              <text
-                x={pos.secondPartyName.x}
-                y={pos.secondPartyName.y}
-                textAnchor="end"
-                fontSize="14"
-                fontWeight="900"
-                style={{ fontWeight: 900 }}
-                direction="rtl"
-                unicodeBidi="embed"
-                fill="#000000"
-              >
-                {contract.secondPartyName || ''}
-              </text>
-            </g>
-
-            {/* Second Party Address */}
-            <g {...getDraggableProps('secondPartyAddress')}>
-              <text
-                x={pos.secondPartyAddress.x}
-                y={pos.secondPartyAddress.y}
-                fontSize="13.5"
-                fontWeight="900"
-                style={{ fontWeight: 900 }}
-                textAnchor="end"
-                direction="rtl"
-                unicodeBidi="embed"
-                fill="#000000"
-              >
-                {contract.secondPartyAddress || ''}
-              </text>
-            </g>
+                  {/* Drag Coordinate Tooltip on active hold */}
+                  {isDragging && (
+                    <g transform={`translate(${fieldPos.x}, ${fieldPos.y - 22})`}>
+                      <rect
+                        x="-45"
+                        y="-16"
+                        width="90"
+                        height="18"
+                        rx="4"
+                        fill="#0f172a"
+                        opacity="0.9"
+                      />
+                      <text
+                        x="0"
+                        y="-4"
+                        fill="#ffffff"
+                        fontSize="10"
+                        textAnchor="middle"
+                        fontFamily="sans-serif"
+                        fontWeight="bold"
+                      >
+                        {`X:${fieldPos.x} Y:${fieldPos.y}`}
+                      </text>
+                    </g>
+                  )}
+                </g>
+              );
+            })}
           </g>
         </svg>
 
         {/* Location Google Maps QR Code Overlay */}
         {contract.showLocationQr && contract.googleMapsUrl && (
           <div
+            {...getPointerEvents('locationQr')}
             style={{
               position: 'absolute',
               left: `${(pos.locationQr.x / 794) * 100}%`,
               top: `${(pos.locationQr.y / 1123) * 100}%`,
               width: '11.5%',
               height: '8.1%',
-              zIndex: 20,
+              zIndex: 30,
               touchAction: isPositioningMode ? 'none' : 'auto',
+              cursor: isPositioningMode ? (activeDraggingField === 'locationQr' ? 'grabbing' : 'crosshair') : 'default',
+              pointerEvents: isPositioningMode ? 'all' : 'none',
             }}
-            {...(isPositioningMode ? getDraggableProps('locationQr') : {})}
-            className={`flex items-center justify-center select-none bg-transparent ${
+            className={`flex items-center justify-center select-none transition-all ${
               isPositioningMode
-                ? 'cursor-grab ring-2 ring-emerald-500 rounded p-1 bg-emerald-50/50 hover:bg-emerald-100/60'
-                : 'pointer-events-none'
+                ? activeDraggingField === 'locationQr'
+                  ? 'ring-4 ring-blue-600 bg-blue-100/90 rounded-lg shadow-2xl scale-110 z-50'
+                  : 'ring-2 ring-emerald-500/80 rounded bg-emerald-50/40 hover:bg-emerald-100/60'
+                : 'bg-transparent'
             }`}
             title={isPositioningMode ? 'اضغط واسحب لتحريك كيو ار الخريطة' : undefined}
           >
@@ -292,6 +267,13 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               bgColor="transparent"
               className="w-full h-full pointer-events-none"
             />
+
+            {/* Drag tooltip for QR code */}
+            {activeDraggingField === 'locationQr' && (
+              <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-mono px-2 py-0.5 rounded shadow-lg whitespace-nowrap pointer-events-none">
+                {`X:${pos.locationQr.x} Y:${pos.locationQr.y}`}
+              </div>
+            )}
           </div>
         )}
       </div>
